@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="theme-color" content="#f7f7f6" />
+    <link rel="icon" href="./icone.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icone-192.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>cisaillement-interface — reprises de betonnage, EN 1992-1-1</title>
+  </head>
+  <body>
+    <nav class="barre" aria-label="suite d'outils">
+      <div class="barre-corps">
+        <span class="barre-nom">Aedificium &middot; Interface</span>
+        <a class="barre-lien" href="https://henri421.github.io/WebAedificium/" target="_blank" rel="noopener"
+          >Suite Aedificium &#8599;</a
+        >
+      </div>
+    </nav>
+
+    <header>
+      <h1>cisaillement-interface</h1>
+      <p class="sous-titre">
+        Cisaillement le long des surfaces de reprise de betonnage (dalle sur predalle, reprise entre deux phases),
+        selon l'EN 1992-1-1 de 2004 (6.2.5) ou de 2023 (8.2.6).
+      </p>
+      <p class="avertissement">
+        Aide au calcul : l'outil constate, il ne prescrit pas. Valeurs recommandees de l'EN 1992-1-1 ; l'annexe
+        nationale peut les modifier. La 2e generation n'est applicable qu'une fois son annexe nationale publiee.
+      </p>
+    </header>
+
+    <main>
+      <section id="saisie" aria-label="saisie">
+        <div class="generations" role="group" aria-label="generation de l Eurocode">
+          <button type="button" data-generation="2004">1re generation (2004)</button>
+          <button type="button" data-generation="2023">2e generation (2023)</button>
+        </div>
+        <p class="note">Basculer de generation conserve toute la saisie.</p>
+        <form id="formulaire" autocomplete="off">
+          <fieldset>
+            <legend>Sollicitation et section composite</legend>
+            <label><span>V<sub>Ed</sub> (kN)</span><input type="text" inputmode="decimal" data-champ="VEd" /></label>
+            <label><span>&beta;, part dans le beton de reprise</span><input type="text" inputmode="decimal" data-champ="beta" /></label>
+            <label><span>z, bras de levier (mm)</span><input type="text" inputmode="decimal" data-champ="z" /></label>
+            <label><span>b<sub>i</sub>, largeur de l interface (mm)</span><input type="text" inputmode="decimal" data-champ="bi" /></label>
+            <label><span>&sigma;<sub>n</sub> (MPa, compression +)</span><input type="text" inputmode="decimal" data-champ="sigmaN" /></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Interface et materiaux</legend>
+            <label
+              ><span>Etat de surface</span>
+              <select data-champ="rugosite" data-role="rugosite"></select>
+            </label>
+            <label><span>f<sub>ck</sub>, plus faible des betons (MPa)</span><input type="text" inputmode="decimal" data-champ="fck" /></label>
+            <label><span>f<sub>yk</sub> (MPa)</span><input type="text" inputmode="decimal" data-champ="fyk" /></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Armatures de couture</legend>
+            <label><span>A<sub>si</sub> (mm&sup2;/m)</span><input type="text" inputmode="decimal" data-champ="Asi" /></label>
+            <label><span>&alpha;, angle avec l interface (&deg;)</span><input type="text" inputmode="decimal" data-champ="alpha" /></label>
+            <div class="groupe" data-groupe="2023">
+              <label class="case"><input type="checkbox" data-champ="armaturesAncrees" /><span>Ancrees pour developper f<sub>yd</sub> (8.76)</span></label>
+            </div>
+            <div class="groupe" data-groupe="2004">
+              <label class="case"><input type="checkbox" data-champ="dynamique" /><span>Charges dynamiques ou de fatigue (c / 2)</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Modele</legend>
+            <div class="boutons">
+              <button type="button" data-action="enregistrer">Enregistrer (JSON)</button>
+              <button type="button" data-action="reinitialiser">Exemple de depart</button>
+            </div>
+            <label class="large fichier"><span>Ouvrir un modele</span><input type="file" accept="application/json,.json" data-role="ouvrir" /></label>
+          </fieldset>
+        </form>
+        <p data-role="erreur" class="erreur" role="alert" hidden></p>
+      </section>
+
+      <div class="colonne">
+        <section aria-label="coupe">
+          <h2>Coupe</h2>
+          <div data-role="coupe"></div>
+        </section>
+        <section aria-label="verification">
+          <h2>Verification</h2>
+          <div data-role="verdict"></div>
+          <div data-role="details"></div>
+        </section>
+        <section id="sorties" aria-label="sorties">
+          <h2>Sorties</h2>
+          <div class="boutons">
+            <button type="button" data-action="exporter-coupe">Coupe (SVG)</button>
+            <button type="button" data-action="exporter-resultats">Resultats (CSV)</button>
+            <button type="button" data-action="exporter-note">Note de calcul (HTML imprimable)</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <p>
+        Partie de la suite <a href="https://henri421.github.io/WebAedificium/">Aedificium</a>. Calcul entierement
+        local : aucune donnee ne quitte le navigateur.
+      </p>
+    </footer>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
