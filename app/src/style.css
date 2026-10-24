@@ -493,3 +493,18 @@ svg .barre { stroke: var(--compression); stroke-width: 3; stroke-linecap: round;
 svg .effort { stroke: var(--texte); stroke-width: 1.5; }
 svg .pointe { fill: var(--texte); }
 svg .etiquette { fill: var(--texte-doux); font-size: 11px; font-family: var(--sans); }
+
+/* Une liste aux options longues ne sort pas de son cadre. */
+select {
+  max-width: 60%;
+}
+
+/* Sur un telephone, les intitules et valeurs longs passent a la ligne plutot
+   que d'elargir la page. */
+@media (max-width: 40rem) {
+  table.grandeurs th,
+  table.grandeurs td.valeur {
+    width: auto;
+    white-space: normal;
+  }
+}
