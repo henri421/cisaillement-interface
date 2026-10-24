@@ -2,7 +2,7 @@
  * Les sorties : SVG autonome, CSV, note de calcul. PUR, sans DOM.
  */
 
-import { JETONS, echapper, type BlocResultat } from 'aedificium-ui';
+import { JETONS, notationHtml, type BlocResultat } from 'aedificium-ui';
 import type { DonneesInterface, ResultatInterface } from '../../src/index';
 import { NOM_GENERATION, tableauVerification, verdictHtml } from './vue';
 
@@ -58,8 +58,8 @@ const STYLE_NOTE = `
 
 function tableDuBloc(b: BlocResultat): string {
   return (
-    `<h3>${echapper(b.titre)}</h3><table><tbody>` +
-    b.lignes.map((l) => `<tr><th>${echapper(l.symbole)}</th><td class="libelle">${echapper(l.libelle)}</td><td class="valeur">${echapper(l.valeur)}</td></tr>`).join('') +
+    `<h3>${notationHtml(b.titre)}</h3><table><tbody>` +
+    b.lignes.map((l) => `<tr><th>${notationHtml(l.symbole)}</th><td class="libelle">${notationHtml(l.libelle)}</td><td class="valeur">${notationHtml(l.valeur)}</td></tr>`).join('') +
     '</tbody></table>'
   );
 }
@@ -72,11 +72,11 @@ export function noteDeCalculHtml(d: DonneesInterface, r: ResultatInterface, entr
 <style>${STYLES_TRACE}${STYLE_NOTE}</style></head>
 <body>
 <h1>Note de calcul — cisaillement a l interface entre betons</h1>
-<p class="date">${echapper(date)} · ${echapper(NOM_GENERATION[r.generation])}</p>
+<p class="date">${notationHtml(date)} · ${notationHtml(NOM_GENERATION[r.generation])}</p>
 <h2>Donnees d entree</h2>${tableDuBloc(entrees)}
 <figure>${coupe}</figure>
 <h2>Verification</h2>${verdictHtml(r)}${r.verifications.map(tableauVerification).join('')}
-<h2>Hypotheses et limites</h2><ul>${HYPOTHESES.map((h) => `<li>${echapper(h)}</li>`).join('')}</ul>
-<p class="pied">${AIDE_AU_CALCUL} V_Ed = ${d.VEd} kN.</p>
+<h2>Hypotheses et limites</h2><ul>${HYPOTHESES.map((h) => `<li>${notationHtml(h)}</li>`).join('')}</ul>
+<p class="pied">${notationHtml(`${AIDE_AU_CALCUL} V_Ed = ${d.VEd} kN.`)}</p>
 </body></html>`;
 }

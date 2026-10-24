@@ -4,7 +4,7 @@
  * L'ecran et la note de calcul appellent ces memes fonctions.
  */
 
-import { echapper, nombreFr, tauxFr, type BlocResultat } from 'aedificium-ui';
+import { notationHtml, notationSvg, nombreFr, tauxFr, type BlocResultat } from 'aedificium-ui';
 import { LIBELLES_RUGOSITE, type DonneesInterface, type ResultatInterface, type Verification } from '../../src/index';
 
 const TITRES = { conforme: 'Conforme', 'non-conforme': 'Non conforme', 'non-applicable': 'Non applicable' } as const;
@@ -28,19 +28,19 @@ export function verdictHtml(r: ResultatInterface): string {
       : `<div class="jauge${taux > 1 ? ' depasse' : ''}"><div style="width:${(Math.min(taux, 1) * 100).toFixed(1)}%"></div></div>` +
         `<p class="taux">Taux ${tauxFr(taux, 2)}</p>`;
   return (
-    `<p class="verdict verdict-${r.verdict}">${TITRES[r.verdict]}</p>${jauge}<p class="motif">${echapper(r.motif)}</p>` +
-    r.avertissements.map((a) => `<p class="alerte">${echapper(a)}</p>`).join('')
+    `<p class="verdict verdict-${r.verdict}">${TITRES[r.verdict]}</p>${jauge}<p class="motif">${notationHtml(r.motif)}</p>` +
+    r.avertissements.map((a) => `<p class="alerte">${notationHtml(a)}</p>`).join('')
   );
 }
 
 /** Les grandeurs du calcul, en tableau. */
 export function tableauVerification(v: Verification): string {
-  const entete = `<h3>${echapper(v.titre)}</h3><p class="clause">${echapper(v.clauses.join(' · '))}</p>`;
-  if (v.statut.etat === 'non-applicable') return `${entete}<p class="motif">${echapper(v.statut.motif)}</p>`;
+  const entete = `<h3>${notationHtml(v.titre)}</h3><p class="clause">${notationHtml(v.clauses.join(' · '))}</p>`;
+  if (v.statut.etat === 'non-applicable') return `${entete}<p class="motif">${notationHtml(v.statut.motif)}</p>`;
   const lignes = v.intermediaires
     .map(
       (g) =>
-        `<tr><th>${echapper(g.symbole)}</th><td class="libelle">${echapper(g.libelle)}</td>` +
+        `<tr><th>${notationHtml(g.symbole)}</th><td class="libelle">${notationHtml(g.libelle)}</td>` +
         `<td class="valeur">${nombreFr(g.valeur, g.unite === '-' ? 5 : 3)}${g.unite === '-' ? '' : ` ${g.unite}`}</td></tr>`
     )
     .join('');
@@ -125,10 +125,10 @@ export function coupe(d: DonneesInterface): string {
 ${barres}
 <line class="effort" x1="${x0 + 70}" y1="${yInterface - 14}" x2="${x0 + 190}" y2="${yInterface - 14}" />
 <path class="pointe" d="M ${x0 + 190} ${yInterface - 19} L ${x0 + 202} ${yInterface - 14} L ${x0 + 190} ${yInterface - 9} Z" />
-<text class="etiquette" x="${x0 + 6}" y="${yHaut + 16}">beton de reprise</text>
-<text class="etiquette" x="${x0 + 6}" y="${yBas - 8}">beton en place</text>
-<text class="etiquette" x="${x0 + L - 6}" y="${yInterface - 6}" text-anchor="end">interface, ${echapper(d.rugosite.replace('-', ' '))}</text>
-<text class="etiquette" x="${x0 + 70}" y="${yInterface - 22}">v_Edi = beta V_Ed / (z b_i)</text>
-<text class="etiquette" x="${x0 + L}" y="${yBas + 20}" text-anchor="end">${d.Asi > 0 ? `A_si = ${nombreFr(d.Asi, 0)} mm2/m, alpha = ${nombreFr(d.alpha, 0)}°` : 'sans armature d interface'}</text>
+<text class="etiquette" x="${x0 + 6}" y="${yHaut + 16}">${notationSvg('beton de reprise')}</text>
+<text class="etiquette" x="${x0 + 6}" y="${yBas - 8}">${notationSvg('beton en place')}</text>
+<text class="etiquette" x="${x0 + L - 6}" y="${yInterface - 6}" text-anchor="end">interface, ${notationSvg(d.rugosite.replace('-', ' '))}</text>
+<text class="etiquette" x="${x0 + 70}" y="${yInterface - 22}">${notationSvg('v_Edi = beta V_Ed / (z b_i)')}</text>
+<text class="etiquette" x="${x0 + L}" y="${yBas + 20}" text-anchor="end">${notationSvg(d.Asi > 0 ? `A_si = ${nombreFr(d.Asi, 0)} mm2/m, alpha = ${nombreFr(d.alpha, 0)}°` : "sans armature d interface")}</text>
 </svg>`;
 }

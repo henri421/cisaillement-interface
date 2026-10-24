@@ -6,7 +6,7 @@
  * de la saisie : la basculer ne touche a aucune valeur saisie.
  */
 
-import { echapper, ouvrirOuTelecharger, resultatsEnCsv, svgAutonome, telecharger } from 'aedificium-ui';
+import { blocsEnTexte, echapper, ouvrirOuTelecharger, resultatsEnCsv, svgAutonome, telecharger } from 'aedificium-ui';
 import { LIBELLES_RUGOSITE, RUGOSITES, ec2Recommande, verifierInterface, type Generation, type Rugosite } from '../../src/index';
 import { lireSaisie, relire, saisieParDefaut, serialiser, type Saisie } from './form';
 import { blocEntrees, blocsResultat, coupe, messageDErreur, tableauVerification, verdictHtml } from './vue';
@@ -143,7 +143,7 @@ document.addEventListener('click', (evenement) => {
   if (action === 'exporter-coupe') {
     telecharger(`${base}-coupe.svg`, svgAutonome(dernier.coupe, STYLES_TRACE), 'image/svg+xml;charset=utf-8');
   } else if (action === 'exporter-resultats') {
-    telecharger(`${base}-resultats.csv`, resultatsEnCsv([entrees, ...blocsResultat(dernier.resultat)]), 'text/csv;charset=utf-8');
+    telecharger(`${base}-resultats.csv`, resultatsEnCsv(blocsEnTexte([entrees, ...blocsResultat(dernier.resultat)])), 'text/csv;charset=utf-8');
   } else if (action === 'exporter-note') {
     ouvrirOuTelecharger(`${base}-note.html`, noteDeCalculHtml(d, dernier.resultat, entrees, dernier.coupe, new Date().toISOString().slice(0, 10)));
   }
