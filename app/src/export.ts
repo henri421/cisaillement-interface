@@ -20,9 +20,8 @@ svg .effort { stroke: var(--texte); stroke-width: 1.5; }
 svg .pointe { fill: var(--texte); }
 svg .etiquette { fill: var(--texte-doux); font-size: 11px; font-family: var(--sans); }`;
 
-const AIDE_AU_CALCUL =
-  "Outil d'aide au calcul. Cet outil constate, il ne prescrit pas. Valeurs recommandées de l'EN 1992-1-1 ; " +
-  "l'annexe nationale peut les modifier. Cette note est un compte rendu, pas une justification réglementaire signée.";
+const MENTION_VALEURS =
+  "Valeurs recommandées de l'EN 1992-1-1 ; l'annexe nationale peut les modifier.";
 
 export const HYPOTHESES = [
   'Contrainte agissante v_Edi = beta V_Ed / (z b_i), identique dans les deux générations ((6.24), (8.75)).',
@@ -77,6 +76,6 @@ export function noteDeCalculHtml(d: DonneesInterface, r: ResultatInterface, entr
 <figure>${coupe}</figure>
 <h2>Vérification</h2>${verdictHtml(r)}${r.verifications.map(tableauVerification).join('')}
 <h2>Hypothèses et limites</h2><ul>${HYPOTHESES.map((h) => `<li>${notationHtml(h)}</li>`).join('')}</ul>
-<p class="pied">${notationHtml(`${AIDE_AU_CALCUL} V_Ed = ${nombreAffiche(d.VEd, 1)} kN.`)}</p>
+<p class="pied">${notationHtml(`${MENTION_VALEURS} V_Ed = ${nombreAffiche(d.VEd, 1)} kN.`)}</p>
 </body></html>`;
 }
