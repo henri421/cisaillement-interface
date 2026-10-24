@@ -4,10 +4,13 @@
  * L'ecran et la note de calcul appellent ces memes fonctions.
  */
 
-import { notationHtml, notationSvg, nombreFr, tauxFr, type BlocResultat } from 'aedificium-ui';
+import { notationHtml, notationSvg, nombreAffiche, tauxAffiche, type BlocResultat } from 'aedificium-ui';
 import { LIBELLES_RUGOSITE, type DonneesInterface, type ResultatInterface, type Verification } from '../../src/index';
 
 const TITRES = { conforme: 'Conforme', 'non-conforme': 'Non conforme', 'non-applicable': 'Non applicable' } as const;
+
+/** Nombre affiche : trois decimales au plus, sans zeros inutiles. */
+const aff = (v: number, d: number): string => nombreAffiche(v, Math.min(d, 3));
 
 export const NOM_GENERATION = {
   '2004': '1re generation — EN 1992-1-1:2004, 6.2.5',
@@ -26,7 +29,7 @@ export function verdictHtml(r: ResultatInterface): string {
     taux === undefined
       ? ''
       : `<div class="jauge${taux > 1 ? ' depasse' : ''}"><div style="width:${(Math.min(taux, 1) * 100).toFixed(1)}%"></div></div>` +
-        `<p class="taux">Taux ${tauxFr(taux, 2)}</p>`;
+        `<p class="taux">Taux ${tauxAffiche(taux)}</p>`;
   return (
     `<p class="verdict verdict-${r.verdict}">${TITRES[r.verdict]}</p>${jauge}<p class="motif">${notationHtml(r.motif)}</p>` +
     r.avertissements.map((a) => `<p class="alerte">${notationHtml(a)}</p>`).join('')
@@ -41,7 +44,7 @@ export function tableauVerification(v: Verification): string {
     .map(
       (g) =>
         `<tr><th>${notationHtml(g.symbole)}</th><td class="libelle">${notationHtml(g.libelle)}</td>` +
-        `<td class="valeur">${nombreFr(g.valeur, g.unite === '-' ? 5 : 3)}${g.unite === '-' ? '' : ` ${g.unite}`}</td></tr>`
+        `<td class="valeur">${aff(g.valeur, g.unite === '-' ? 5 : 3)}${g.unite === '-' ? '' : ` ${g.unite}`}</td></tr>`
     )
     .join('');
   return `${entete}<table class="grandeurs"><tbody>${lignes}</tbody></table>`;
@@ -54,16 +57,16 @@ export function blocEntrees(d: DonneesInterface, generation: '2004' | '2023'): B
     titre: 'Donnees d entree',
     lignes: [
       l('generation', 'texte applique', NOM_GENERATION[generation]),
-      l('V_Ed', 'effort tranchant de calcul', `${nombreFr(d.VEd, 1)} kN`),
-      l('beta', 'part de l effort longitudinal dans le beton de reprise', nombreFr(d.beta, 3)),
-      l('z', 'bras de levier de la section composite', `${nombreFr(d.z, 0)} mm`),
-      l('b_i', 'largeur de l interface', `${nombreFr(d.bi, 0)} mm`),
+      l('V_Ed', 'effort tranchant de calcul', `${aff(d.VEd, 1)} kN`),
+      l('beta', 'part de l effort longitudinal dans le beton de reprise', aff(d.beta, 3)),
+      l('z', 'bras de levier de la section composite', `${aff(d.z, 0)} mm`),
+      l('b_i', 'largeur de l interface', `${aff(d.bi, 0)} mm`),
       l('surface', 'etat de surface', LIBELLES_RUGOSITE[d.rugosite]),
-      l('f_ck', 'plus faible des deux betons', `${nombreFr(d.fck, 0)} MPa`),
-      l('f_yk', 'armatures', `${nombreFr(d.fyk, 0)} MPa`),
-      l('A_si', 'armatures traversant l interface', `${nombreFr(d.Asi, 0)} mm2/m`),
-      l('alpha', 'angle des armatures avec l interface', `${nombreFr(d.alpha, 0)} degres`),
-      l('sigma_n', 'contrainte normale, positive en compression', `${nombreFr(d.sigmaN, 2)} MPa`),
+      l('f_ck', 'plus faible des deux betons', `${aff(d.fck, 0)} MPa`),
+      l('f_yk', 'armatures', `${aff(d.fyk, 0)} MPa`),
+      l('A_si', 'armatures traversant l interface', `${aff(d.Asi, 0)} mm2/m`),
+      l('alpha', 'angle des armatures avec l interface', `${aff(d.alpha, 0)} degres`),
+      l('sigma_n', 'contrainte normale, positive en compression', `${aff(d.sigmaN, 2)} MPa`),
       ...(generation === '2004'
         ? [l('charges', 'dynamiques ou de fatigue', d.dynamique ? 'oui' : 'non')]
         : [l('ancrage', 'armatures ancrees pour f_yd', d.Asi === 0 ? 'sans objet (A_si = 0)' : d.armaturesAncrees ? 'oui' : 'non')]),
@@ -80,7 +83,7 @@ export function blocsResultat(r: ResultatInterface): BlocResultat[] {
       lignes: v.intermediaires.map((g) => ({
         symbole: g.symbole,
         libelle: g.libelle,
-        valeur: `${nombreFr(g.valeur, g.unite === '-' ? 5 : 3)}${g.unite === '-' ? '' : ` ${g.unite}`}`,
+        valeur: `${aff(g.valeur, g.unite === '-' ? 5 : 3)}${g.unite === '-' ? '' : ` ${g.unite}`}`,
       })),
       note: v.statut.etat === 'non-applicable' ? v.statut.motif : null,
     })),
@@ -88,7 +91,7 @@ export function blocsResultat(r: ResultatInterface): BlocResultat[] {
       titre: 'Verdict',
       lignes: [
         { symbole: 'constat', libelle: 'verdict', valeur: TITRES[r.verdict] },
-        ...(r.verifications[0].taux === undefined ? [] : [{ symbole: 'taux', libelle: 'sollicitation / resistance', valeur: tauxFr(r.verifications[0].taux, 2) }]),
+        ...(r.verifications[0].taux === undefined ? [] : [{ symbole: 'taux', libelle: 'sollicitation / resistance', valeur: tauxAffiche(r.verifications[0].taux) }]),
       ],
       note: [r.motif, ...r.avertissements].join(' '),
     },
@@ -129,6 +132,6 @@ ${barres}
 <text class="etiquette" x="${x0 + 6}" y="${yBas - 8}">${notationSvg('beton en place')}</text>
 <text class="etiquette" x="${x0 + L - 6}" y="${yInterface - 6}" text-anchor="end">interface, ${notationSvg(d.rugosite.replace('-', ' '))}</text>
 <text class="etiquette" x="${x0 + 70}" y="${yInterface - 22}">${notationSvg('v_Edi = beta V_Ed / (z b_i)')}</text>
-<text class="etiquette" x="${x0 + L}" y="${yBas + 20}" text-anchor="end">${notationSvg(d.Asi > 0 ? `A_si = ${nombreFr(d.Asi, 0)} mm2/m, alpha = ${nombreFr(d.alpha, 0)}°` : "sans armature d interface")}</text>
+<text class="etiquette" x="${x0 + L}" y="${yBas + 20}" text-anchor="end">${notationSvg(d.Asi > 0 ? `A_si = ${aff(d.Asi, 0)} mm2/m, alpha = ${aff(d.alpha, 0)}°` : "sans armature d interface")}</text>
 </svg>`;
 }

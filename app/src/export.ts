@@ -2,7 +2,7 @@
  * Les sorties : SVG autonome, CSV, note de calcul. PUR, sans DOM.
  */
 
-import { JETONS, notationHtml, type BlocResultat } from 'aedificium-ui';
+import { JETONS, notationHtml, nombreAffiche, type BlocResultat } from 'aedificium-ui';
 import type { DonneesInterface, ResultatInterface } from '../../src/index';
 import { NOM_GENERATION, tableauVerification, verdictHtml } from './vue';
 
@@ -77,6 +77,6 @@ export function noteDeCalculHtml(d: DonneesInterface, r: ResultatInterface, entr
 <figure>${coupe}</figure>
 <h2>Verification</h2>${verdictHtml(r)}${r.verifications.map(tableauVerification).join('')}
 <h2>Hypotheses et limites</h2><ul>${HYPOTHESES.map((h) => `<li>${notationHtml(h)}</li>`).join('')}</ul>
-<p class="pied">${notationHtml(`${AIDE_AU_CALCUL} V_Ed = ${d.VEd} kN.`)}</p>
+<p class="pied">${notationHtml(`${AIDE_AU_CALCUL} V_Ed = ${nombreAffiche(d.VEd, 1)} kN.`)}</p>
 </body></html>`;
 }

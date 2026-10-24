@@ -89,6 +89,13 @@ const N_PAR_KN = 1000;
 const MM_PAR_M = 1000;
 const rad = (deg: number): number => (deg * Math.PI) / 180;
 
+/** Nombre a la francaise, trois decimales au plus, sans zeros inutiles (le noyau n'importe rien). */
+function fr(x: number, d: number): string {
+  const texte = x.toFixed(d).replace('.', ',');
+  const sans = texte.includes(',') ? texte.replace(/,?0+$/, '') : texte;
+  return sans === '-0' ? '0' : sans;
+}
+
 function positif(v: number, nom: string, unite: string): void {
   if (!(Number.isFinite(v) && v > 0)) throw new Error(`${nom} doit etre un nombre strictement positif (${unite}).`);
 }
@@ -134,7 +141,7 @@ export function verifier2004(d: DonneesInterface, p: ProfilInterface): Verificat
   const clauses = ['6.2.5(1)', '(6.24)', '(6.25)', '6.2.5(2)'];
   const fcd = (q.alphaCc.valeur * d.fck) / q.gammaC.valeur;
   if (d.alpha < 45 || d.alpha > 90) {
-    return { id: '2004', titre, clauses, statut: { etat: 'non-applicable', motif: `alpha = ${d.alpha} degres hors de la plage 45 a 90 degres de 6.2.5(1).` }, intermediaires: [] };
+    return { id: '2004', titre, clauses, statut: { etat: 'non-applicable', motif: `alpha = ${fr(d.alpha, 3)} degres hors de la plage 45 a 90 degres de 6.2.5(1).` }, intermediaires: [] };
   }
   if (d.sigmaN > 0.6 * fcd) {
     return { id: '2004', titre, clauses, statut: { etat: 'non-applicable', motif: 'sigma_n depasse 0,6 f_cd (6.2.5(1)).' }, intermediaires: [] };
@@ -186,7 +193,7 @@ function fcd2023(d: DonneesInterface, p: ProfilInterface): number {
 
 function conditions2023(d: DonneesInterface, fcd: number): string | null {
   const max = d.rugosite === 'tres-lisse' ? 90 : 135;
-  if (d.alpha < 35 || d.alpha > max) return `alpha = ${d.alpha} degres hors de la plage 35 a ${max} degres (8.2.6).`;
+  if (d.alpha < 35 || d.alpha > max) return `alpha = ${fr(d.alpha, 3)} degres hors de la plage 35 a ${max} degres (8.2.6).`;
   if (d.sigmaN > 0.6 * fcd) return 'sigma_n depasse 0,6 f_cd (8.2.6).';
   return null;
 }
@@ -226,7 +233,7 @@ export function verifier2023Ancrees(d: DonneesInterface, p: ProfilInterface): Ve
       g('c_v1 √f_ck / gamma_C', traction ? 'annule : interface tendue' : 'terme de cohesion', cohesion, 'MPa'),
       g('mu_v sigma_n', traction ? 'annule : interface tendue' : 'terme de frottement', frottement, 'MPa'),
       g('rho_i f_yd (mu_v sin a + cos a)', 'terme des armatures', acier, 'MPa'),
-      g('0,30 f_cd + rho_i f_yd cos a', 'plafond', plafond, 'MPa'),
+      g('0,3 f_cd + rho_i f_yd cos a', 'plafond', plafond, 'MPa'),
       g('tau_Rdi', 'resistance', tauRdi, 'MPa'),
     ],
   });
@@ -297,7 +304,7 @@ export function verifierInterface(d: DonneesInterface, generation: Generation, p
   let verifications: Verification[];
   if (generation === '2004') {
     if (d.rugosite === 'tres-rugueuse') avertissements.push('Surface « tres rugueuse » : classe absente de la 1re generation, traitee comme « rugueuse ».');
-    if (d.rugosite === 'tres-lisse') avertissements.push('Surface « tres lisse » : c pris a la borne basse 0,025 de la plage 0,025 a 0,10 de 6.2.5(2).');
+    if (d.rugosite === 'tres-lisse') avertissements.push('Surface « tres lisse » : c pris a la borne basse 0,025 de la plage 0,025 a 0,1 de 6.2.5(2).');
     verifications = [verifier2004(d, p)];
   } else {
     if (d.dynamique) avertissements.push('Charges dynamiques ou de fatigue : la reduction de 6.2.5(5) de la 1re generation n est pas reprise ici en 2e generation.');
@@ -311,6 +318,6 @@ export function verifierInterface(d: DonneesInterface, generation: Generation, p
   const s = retenue.sollicitation as number;
   const r = retenue.resistance as number;
   const ok = s <= r;
-  const motif = `${generation === '2004' ? 'v_Edi' : 'tau_Edi'} = ${s.toFixed(3)} MPa ${ok ? '<=' : '>'} ${r.toFixed(3)} MPa (${retenue.titre}).`;
+  const motif = `${generation === '2004' ? 'v_Edi' : 'tau_Edi'} = ${fr(s, 3)} MPa ${ok ? '<=' : '>'} ${fr(r, 3)} MPa (${retenue.titre}).`;
   return { generation, verifications, verdict: ok ? 'conforme' : 'non-conforme', motif, avertissements };
 }
