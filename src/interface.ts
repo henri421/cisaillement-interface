@@ -97,7 +97,7 @@ function fr(x: number, d: number): string {
 }
 
 function positif(v: number, nom: string, unite: string): void {
-  if (!(Number.isFinite(v) && v > 0)) throw new Error(`${nom} doit etre un nombre strictement positif (${unite}).`);
+  if (!(Number.isFinite(v) && v > 0)) throw new Error(`${nom} doit être un nombre strictement positif (${unite}).`);
 }
 
 function controlerDonnees(d: DonneesInterface): void {
@@ -107,10 +107,10 @@ function controlerDonnees(d: DonneesInterface): void {
   positif(d.bi, 'b_i', 'mm');
   positif(d.fck, 'f_ck', 'MPa');
   positif(d.fyk, 'f_yk', 'MPa');
-  if (!(Number.isFinite(d.Asi) && d.Asi >= 0)) throw new Error('A_si doit etre un nombre positif ou nul (mm2/m).');
-  if (!Number.isFinite(d.alpha)) throw new Error('alpha doit etre un nombre (degres).');
-  if (!Number.isFinite(d.sigmaN)) throw new Error('sigma_n doit etre un nombre (MPa).');
-  if (d.beta > 1) throw new Error('beta ne peut pas depasser 1 : c est une part de l effort longitudinal.');
+  if (!(Number.isFinite(d.Asi) && d.Asi >= 0)) throw new Error('A_si doit être un nombre positif ou nul (mm2/m).');
+  if (!Number.isFinite(d.alpha)) throw new Error('alpha doit être un nombre (degrés).');
+  if (!Number.isFinite(d.sigmaN)) throw new Error('sigma_n doit être un nombre (MPa).');
+  if (d.beta > 1) throw new Error("beta ne peut pas dépasser 1 : c'est une part de l'effort longitudinal.");
 }
 
 /** v_Edi = beta V_Ed / (z b_i) (MPa). */
@@ -137,14 +137,14 @@ function avecTaux(v: Omit<Verification, 'taux'>): Verification {
 
 export function verifier2004(d: DonneesInterface, p: ProfilInterface): Verification {
   const q = p.ec2004;
-  const titre = 'Cisaillement a l interface, EN 1992-1-1:2004';
+  const titre = "Cisaillement à l'interface, EN 1992-1-1:2004";
   const clauses = ['6.2.5(1)', '(6.24)', '(6.25)', '6.2.5(2)'];
   const fcd = (q.alphaCc.valeur * d.fck) / q.gammaC.valeur;
   if (d.alpha < 45 || d.alpha > 90) {
-    return { id: '2004', titre, clauses, statut: { etat: 'non-applicable', motif: `alpha = ${fr(d.alpha, 3)} degres hors de la plage 45 a 90 degres de 6.2.5(1).` }, intermediaires: [] };
+    return { id: '2004', titre, clauses, statut: { etat: 'non-applicable', motif: `alpha = ${fr(d.alpha, 3)} degrés hors de la plage 45 à 90 degrés de 6.2.5(1).` }, intermediaires: [] };
   }
   if (d.sigmaN > 0.6 * fcd) {
-    return { id: '2004', titre, clauses, statut: { etat: 'non-applicable', motif: 'sigma_n depasse 0,6 f_cd (6.2.5(1)).' }, intermediaires: [] };
+    return { id: '2004', titre, clauses, statut: { etat: 'non-applicable', motif: 'sigma_n dépasse 0,6 f_cd (6.2.5(1)).' }, intermediaires: [] };
   }
   const v = contrainteInterface(d);
   const rho = tauxArmature(d);
@@ -169,17 +169,17 @@ export function verifier2004(d: DonneesInterface, p: ProfilInterface): Verificat
     resistance: vRdi,
     intermediaires: [
       g('v_Edi', 'beta V_Ed / (z b_i)', v, 'MPa'),
-      g('c', d.dynamique ? 'cohesion, divisee par 2 (charges dynamiques, 6.2.5(5))' : 'cohesion', c, '-'),
+      g('c', d.dynamique ? 'cohésion, divisée par 2 (charges dynamiques, 6.2.5(5))' : 'cohésion', c, '-'),
       g('mu', 'frottement', mu, '-'),
       g('f_ctd', '0,7 f_ctm / gamma_C', fctd, 'MPa'),
       g('f_cd', 'alpha_cc f_ck / gamma_C', fcd, 'MPa'),
       g('f_yd', 'f_yk / gamma_S', fyd, 'MPa'),
       g('rho', 'A_si / A_i', rho, '-'),
-      g('c f_ctd', d.sigmaN < 0 ? 'annule : interface tendue' : 'terme de cohesion', cohesion, 'MPa'),
+      g('c f_ctd', d.sigmaN < 0 ? 'annulé : interface tendue' : 'terme de cohésion', cohesion, 'MPa'),
       g('mu sigma_n', 'terme de frottement', frottement, 'MPa'),
       g('rho f_yd (mu sin a + cos a)', 'terme des armatures', acier, 'MPa'),
       g('0,5 nu f_cd', 'plafond, nu = 0,6 (1 - f_ck/250)', plafond, 'MPa'),
-      g('v_Rdi', 'resistance', vRdi, 'MPa'),
+      g('v_Rdi', 'résistance', vRdi, 'MPa'),
     ],
   });
 }
@@ -193,14 +193,14 @@ function fcd2023(d: DonneesInterface, p: ProfilInterface): number {
 
 function conditions2023(d: DonneesInterface, fcd: number): string | null {
   const max = d.rugosite === 'tres-lisse' ? 90 : 135;
-  if (d.alpha < 35 || d.alpha > max) return `alpha = ${fr(d.alpha, 3)} degres hors de la plage 35 a ${max} degres (8.2.6).`;
-  if (d.sigmaN > 0.6 * fcd) return 'sigma_n depasse 0,6 f_cd (8.2.6).';
+  if (d.alpha < 35 || d.alpha > max) return `alpha = ${fr(d.alpha, 3)} degrés hors de la plage 35 à ${max} degrés (8.2.6).`;
+  if (d.sigmaN > 0.6 * fcd) return 'sigma_n dépasse 0,6 f_cd (8.2.6).';
   return null;
 }
 
 export function verifier2023Ancrees(d: DonneesInterface, p: ProfilInterface): Verification {
   const q = p.ec2023;
-  const titre = 'Armatures ancrees pour f_yd, EN 1992-1-1:2023';
+  const titre = 'Armatures ancrées pour f_yd, EN 1992-1-1:2023';
   const clauses = ['8.2.6(5)', '(8.75)', '(8.76)', 'tableau 8.2'];
   const fcd = fcd2023(d, p);
   const motif = conditions2023(d, fcd);
@@ -225,16 +225,16 @@ export function verifier2023Ancrees(d: DonneesInterface, p: ProfilInterface): Ve
     resistance: tauRdi,
     intermediaires: [
       g('tau_Edi', 'beta V_Ed / (z b_i)', tau, 'MPa'),
-      g('c_v1', 'cohesion', cv1, '-'),
+      g('c_v1', 'cohésion', cv1, '-'),
       g('mu_v', 'frottement', mu, '-'),
       g('f_cd', 'eta_cc k_tc f_ck / gamma_C', fcd, 'MPa'),
       g('f_yd', 'f_yk / gamma_S', fyd, 'MPa'),
       g('rho_i', 'A_si / A_i', rho, '-'),
-      g('c_v1 √f_ck / gamma_C', traction ? 'annule : interface tendue' : 'terme de cohesion', cohesion, 'MPa'),
+      g('c_v1 √f_ck / gamma_C', traction ? 'annulé : interface tendue' : 'terme de cohésion', cohesion, 'MPa'),
       g('mu_v sigma_n', traction ? 'annule : interface tendue' : 'terme de frottement', frottement, 'MPa'),
       g('rho_i f_yd (mu_v sin a + cos a)', 'terme des armatures', acier, 'MPa'),
       g('0,3 f_cd + rho_i f_yd cos a', 'plafond', plafond, 'MPa'),
-      g('tau_Rdi', 'resistance', tauRdi, 'MPa'),
+      g('tau_Rdi', 'résistance', tauRdi, 'MPa'),
     ],
   });
 }
@@ -248,7 +248,7 @@ export function verifier2023AncrageInsuffisant(d: DonneesInterface, p: ProfilInt
   const kv = q.kV[d.rugosite];
   const kd = q.kDowel[d.rugosite];
   if (cv2 === null || kv === null || kd === null) {
-    return { id: '2023-insuffisant', titre, clauses, statut: { etat: 'non-applicable', motif: 'Interface a cles : la formule (8.77) est sans objet.' }, intermediaires: [] };
+    return { id: '2023-insuffisant', titre, clauses, statut: { etat: 'non-applicable', motif: 'Interface à clés : la formule (8.77) est sans objet.' }, intermediaires: [] };
   }
   const motif = conditions2023(d, fcd);
   if (motif !== null) return { id: '2023-insuffisant', titre, clauses, statut: { etat: 'non-applicable', motif }, intermediaires: [] };
@@ -272,18 +272,18 @@ export function verifier2023AncrageInsuffisant(d: DonneesInterface, p: ProfilInt
     resistance: tauRdi,
     intermediaires: [
       g('tau_Edi', 'beta V_Ed / (z b_i)', tau, 'MPa'),
-      g('c_v2', 'cohesion', cv2.valeur, '-'),
+      g('c_v2', 'cohésion', cv2.valeur, '-'),
       g('mu_v', 'frottement', mu, '-'),
-      g('k_v', 'efficacite des armatures', kv.valeur, '-'),
+      g('k_v', 'efficacité des armatures', kv.valeur, '-'),
       g('k_dowel', 'effet de goujon', kd.valeur, '-'),
       g('f_cd', 'eta_cc k_tc f_ck / gamma_C', fcd, 'MPa'),
       g('rho_i', 'A_si / A_i', rho, '-'),
-      g('c_v2 √f_ck / gamma_C', traction ? 'annule : interface tendue' : 'terme de cohesion', cohesion, 'MPa'),
-      g('mu_v sigma_n', traction ? 'annule : interface tendue' : 'terme de frottement', frottement, 'MPa'),
+      g('c_v2 √f_ck / gamma_C', traction ? 'annulé : interface tendue' : 'terme de cohésion', cohesion, 'MPa'),
+      g('mu_v sigma_n', traction ? 'annulé : interface tendue' : 'terme de frottement', frottement, 'MPa'),
       g('k_v rho_i f_yd mu_v', 'terme des armatures', acier, 'MPa'),
       g('k_dowel rho_i √(f_yd f_cd)', 'terme de goujon', goujon, 'MPa'),
       g('0,25 f_cd', 'plafond', plafond, 'MPa'),
-      g('tau_Rdi', 'resistance', tauRdi, 'MPa'),
+      g('tau_Rdi', 'résistance', tauRdi, 'MPa'),
     ],
   });
 }
@@ -303,11 +303,11 @@ export function verifierInterface(d: DonneesInterface, generation: Generation, p
   const avertissements: string[] = [];
   let verifications: Verification[];
   if (generation === '2004') {
-    if (d.rugosite === 'tres-rugueuse') avertissements.push('Surface « tres rugueuse » : classe absente de la 1re generation, traitee comme « rugueuse ».');
-    if (d.rugosite === 'tres-lisse') avertissements.push('Surface « tres lisse » : c pris a la borne basse 0,025 de la plage 0,025 a 0,1 de 6.2.5(2).');
+    if (d.rugosite === 'tres-rugueuse') avertissements.push('Surface « très rugueuse » : classe absente de la 1re génération, traitée comme « rugueuse ».');
+    if (d.rugosite === 'tres-lisse') avertissements.push('Surface « très lisse » : c pris à la borne basse 0,025 de la plage 0,025 à 0,1 de 6.2.5(2).');
     verifications = [verifier2004(d, p)];
   } else {
-    if (d.dynamique) avertissements.push('Charges dynamiques ou de fatigue : la reduction de 6.2.5(5) de la 1re generation n est pas reprise ici en 2e generation.');
+    if (d.dynamique) avertissements.push("Charges dynamiques ou de fatigue : la réduction de 6.2.5(5) de la 1re génération n'est pas reprise ici en 2e génération.");
     verifications = [d.Asi === 0 || d.armaturesAncrees ? verifier2023Ancrees(d, p) : verifier2023AncrageInsuffisant(d, p)];
   }
 

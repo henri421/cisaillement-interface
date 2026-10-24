@@ -21,15 +21,15 @@ svg .pointe { fill: var(--texte); }
 svg .etiquette { fill: var(--texte-doux); font-size: 11px; font-family: var(--sans); }`;
 
 const AIDE_AU_CALCUL =
-  "Outil d'aide au calcul. Cet outil constate, il ne prescrit pas. Valeurs recommandees de l'EN 1992-1-1 ; " +
-  "l'annexe nationale peut les modifier. Cette note est un compte rendu, pas une justification reglementaire signee.";
+  "Outil d'aide au calcul. Cet outil constate, il ne prescrit pas. Valeurs recommandées de l'EN 1992-1-1 ; " +
+  "l'annexe nationale peut les modifier. Cette note est un compte rendu, pas une justification réglementaire signée.";
 
 export const HYPOTHESES = [
-  'Contrainte agissante v_Edi = beta V_Ed / (z b_i), identique dans les deux generations ((6.24), (8.75)).',
-  'Effet de goujon (2e generation) : barre supposee a au moins 10 phi du bord libre.',
-  'Majoration de c_v2 par 1,2 pour les dalles rapportees non appliquee (sens de la securite).',
-  '1re generation : surface « tres lisse » a c = 0,025 (borne basse) ; « tres rugueuse » traitee comme « rugueuse ».',
-  'Interface en escalier (6.2.5(3)) et calcul du beta par la section ne sont pas traites : beta est saisi.',
+  'Contrainte agissante v_Edi = beta V_Ed / (z b_i), identique dans les deux générations ((6.24), (8.75)).',
+  'Effet de goujon (2e génération) : barre supposée à au moins 10 phi du bord libre.',
+  'Majoration de c_v2 par 1,2 pour les dalles rapportées non appliquée (sens de la sécurité).',
+  '1re génération : surface « très lisse » à c = 0,025 (borne basse) ; « très rugueuse » traitée comme « rugueuse ».',
+  'Interface en escalier (6.2.5(3)) et calcul du beta par la section ne sont pas traités : beta est saisi.',
 ];
 
 const STYLE_NOTE = `
@@ -68,15 +68,15 @@ function tableDuBloc(b: BlocResultat): string {
 export function noteDeCalculHtml(d: DonneesInterface, r: ResultatInterface, entrees: BlocResultat, coupe: string, date: string): string {
   return `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8" />
-<title>Note de calcul — cisaillement a l interface</title>
+<title>Note de calcul — cisaillement à l'interface</title>
 <style>${STYLES_TRACE}${STYLE_NOTE}</style></head>
 <body>
-<h1>Note de calcul — cisaillement a l interface entre betons</h1>
+<h1>Note de calcul — cisaillement à l'interface entre bétons</h1>
 <p class="date">${notationHtml(date)} · ${notationHtml(NOM_GENERATION[r.generation])}</p>
-<h2>Donnees d entree</h2>${tableDuBloc(entrees)}
+<h2>Données d'entrée</h2>${tableDuBloc(entrees)}
 <figure>${coupe}</figure>
-<h2>Verification</h2>${verdictHtml(r)}${r.verifications.map(tableauVerification).join('')}
-<h2>Hypotheses et limites</h2><ul>${HYPOTHESES.map((h) => `<li>${notationHtml(h)}</li>`).join('')}</ul>
+<h2>Vérification</h2>${verdictHtml(r)}${r.verifications.map(tableauVerification).join('')}
+<h2>Hypothèses et limites</h2><ul>${HYPOTHESES.map((h) => `<li>${notationHtml(h)}</li>`).join('')}</ul>
 <p class="pied">${notationHtml(`${AIDE_AU_CALCUL} V_Ed = ${nombreAffiche(d.VEd, 1)} kN.`)}</p>
 </body></html>`;
 }

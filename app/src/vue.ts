@@ -13,8 +13,8 @@ const TITRES = { conforme: 'Conforme', 'non-conforme': 'Non conforme', 'non-appl
 const aff = (v: number, d: number): string => nombreAffiche(v, Math.min(d, 3));
 
 export const NOM_GENERATION = {
-  '2004': '1re generation — EN 1992-1-1:2004, 6.2.5',
-  '2023': '2e generation — EN 1992-1-1:2023, 8.2.6',
+  '2004': '1re génération — EN 1992-1-1:2004, 6.2.5',
+  '2023': '2e génération — EN 1992-1-1:2023, 8.2.6',
 } as const;
 
 export function messageDErreur(e: unknown): string {
@@ -54,22 +54,22 @@ export function tableauVerification(v: Verification): string {
 export function blocEntrees(d: DonneesInterface, generation: '2004' | '2023'): BlocResultat {
   const l = (symbole: string, libelle: string, valeur: string) => ({ symbole, libelle, valeur });
   return {
-    titre: 'Donnees d entree',
+    titre: "Données d'entrée",
     lignes: [
-      l('generation', 'texte applique', NOM_GENERATION[generation]),
+      l('génération', 'texte appliqué', NOM_GENERATION[generation]),
       l('V_Ed', 'effort tranchant de calcul', `${aff(d.VEd, 1)} kN`),
-      l('beta', 'part de l effort longitudinal dans le beton de reprise', aff(d.beta, 3)),
+      l('beta', "part de l'effort longitudinal dans le béton de reprise", aff(d.beta, 3)),
       l('z', 'bras de levier de la section composite', `${aff(d.z, 0)} mm`),
-      l('b_i', 'largeur de l interface', `${aff(d.bi, 0)} mm`),
-      l('surface', 'etat de surface', LIBELLES_RUGOSITE[d.rugosite]),
-      l('f_ck', 'plus faible des deux betons', `${aff(d.fck, 0)} MPa`),
+      l('b_i', "largeur de l'interface", `${aff(d.bi, 0)} mm`),
+      l('surface', 'état de surface', LIBELLES_RUGOSITE[d.rugosite]),
+      l('f_ck', 'plus faible des deux bétons', `${aff(d.fck, 0)} MPa`),
       l('f_yk', 'armatures', `${aff(d.fyk, 0)} MPa`),
-      l('A_si', 'armatures traversant l interface', `${aff(d.Asi, 0)} mm2/m`),
-      l('alpha', 'angle des armatures avec l interface', `${aff(d.alpha, 0)} degres`),
+      l('A_si', "armatures traversant l'interface", `${aff(d.Asi, 0)} mm2/m`),
+      l('alpha', "angle des armatures avec l'interface", `${aff(d.alpha, 0)} degrés`),
       l('sigma_n', 'contrainte normale, positive en compression', `${aff(d.sigmaN, 2)} MPa`),
       ...(generation === '2004'
         ? [l('charges', 'dynamiques ou de fatigue', d.dynamique ? 'oui' : 'non')]
-        : [l('ancrage', 'armatures ancrees pour f_yd', d.Asi === 0 ? 'sans objet (A_si = 0)' : d.armaturesAncrees ? 'oui' : 'non')]),
+        : [l('ancrage', 'armatures ancrées pour f_yd', d.Asi === 0 ? 'sans objet (A_si = 0)' : d.armaturesAncrees ? 'oui' : 'non')]),
     ],
     note: null,
   };
@@ -91,7 +91,7 @@ export function blocsResultat(r: ResultatInterface): BlocResultat[] {
       titre: 'Verdict',
       lignes: [
         { symbole: 'constat', libelle: 'verdict', valeur: TITRES[r.verdict] },
-        ...(r.verifications[0].taux === undefined ? [] : [{ symbole: 'taux', libelle: 'sollicitation / resistance', valeur: tauxAffiche(r.verifications[0].taux) }]),
+        ...(r.verifications[0].taux === undefined ? [] : [{ symbole: 'taux', libelle: 'sollicitation / résistance', valeur: tauxAffiche(r.verifications[0].taux) }]),
       ],
       note: [r.motif, ...r.avertissements].join(' '),
     },
@@ -128,10 +128,10 @@ export function coupe(d: DonneesInterface): string {
 ${barres}
 <line class="effort" x1="${x0 + 70}" y1="${yInterface - 14}" x2="${x0 + 190}" y2="${yInterface - 14}" />
 <path class="pointe" d="M ${x0 + 190} ${yInterface - 19} L ${x0 + 202} ${yInterface - 14} L ${x0 + 190} ${yInterface - 9} Z" />
-<text class="etiquette" x="${x0 + 6}" y="${yHaut + 16}">${notationSvg('beton de reprise')}</text>
-<text class="etiquette" x="${x0 + 6}" y="${yBas - 8}">${notationSvg('beton en place')}</text>
-<text class="etiquette" x="${x0 + L - 6}" y="${yInterface - 6}" text-anchor="end">interface, ${notationSvg(d.rugosite.replace('-', ' '))}</text>
+<text class="etiquette" x="${x0 + 6}" y="${yHaut + 16}">${notationSvg('béton de reprise')}</text>
+<text class="etiquette" x="${x0 + 6}" y="${yBas - 8}">${notationSvg('béton en place')}</text>
+<text class="etiquette" x="${x0 + L - 6}" y="${yInterface - 6}" text-anchor="end">${notationSvg(`interface, ${LIBELLES_RUGOSITE[d.rugosite]}`)}</text>
 <text class="etiquette" x="${x0 + 70}" y="${yInterface - 22}">${notationSvg('v_Edi = beta V_Ed / (z b_i)')}</text>
-<text class="etiquette" x="${x0 + L}" y="${yBas + 20}" text-anchor="end">${notationSvg(d.Asi > 0 ? `A_si = ${aff(d.Asi, 0)} mm2/m, alpha = ${aff(d.alpha, 0)}°` : "sans armature d interface")}</text>
+<text class="etiquette" x="${x0 + L}" y="${yBas + 20}" text-anchor="end">${notationSvg(d.Asi > 0 ? `A_si = ${aff(d.Asi, 0)} mm2/m, alpha = ${aff(d.alpha, 0)}°` : "sans armature d'interface")}</text>
 </svg>`;
 }

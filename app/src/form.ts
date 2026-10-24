@@ -64,10 +64,10 @@ export function lireSaisie(s: Saisie): Lecture {
   for (const champ of Object.keys(LIBELLES)) {
     const brut = String(s[champ as keyof Saisie]);
     const v = lireNombre(brut);
-    if (v === null) return { ok: false, message: `${LIBELLES[champ]} : nombre attendu, recu « ${brut} ».` };
+    if (v === null) return { ok: false, message: `${LIBELLES[champ]} : nombre attendu, reçu « ${brut} ».` };
     n[champ] = v;
   }
-  if (!RUGOSITES.includes(s.rugosite)) return { ok: false, message: 'Etat de surface inconnu.' };
+  if (!RUGOSITES.includes(s.rugosite)) return { ok: false, message: 'État de surface inconnu.' };
   return {
     ok: true,
     donnees: {

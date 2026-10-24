@@ -6,7 +6,7 @@
  * de la saisie : la basculer ne touche a aucune valeur saisie.
  */
 
-import { blocsEnTexte, echapper, ouvrirOuTelecharger, resultatsEnCsv, svgAutonome, telecharger } from 'aedificium-ui';
+import { blocsEnTexte, echapper, notationHtml, ouvrirOuTelecharger, resultatsEnCsv, svgAutonome, telecharger } from 'aedificium-ui';
 import { LIBELLES_RUGOSITE, RUGOSITES, ec2Recommande, verifierInterface, type Generation, type Rugosite } from '../../src/index';
 import { lireSaisie, relire, saisieParDefaut, serialiser, type Saisie } from './form';
 import { blocEntrees, blocsResultat, coupe, messageDErreur, tableauVerification, verdictHtml } from './vue';
@@ -18,7 +18,7 @@ const CLE_STOCKAGE = 'cisaillement-interface/saisie';
 
 function exige<T extends Element>(selecteur: string): T {
   const e = document.querySelector<T>(selecteur);
-  if (e === null) throw new Error(`Element absent de la page : ${selecteur}`);
+  if (e === null) throw new Error(`Élément absent de la page : ${selecteur}`);
   return e;
 }
 
@@ -70,7 +70,7 @@ function ecrireSaisie(): void {
 
 function montrerErreur(message: string | null): void {
   zones.erreur.hidden = message === null;
-  zones.erreur.textContent = message ?? '';
+  zones.erreur.innerHTML = message === null ? '' : notationHtml(message);
 }
 
 /** Les champs propres a une generation s'affichent avec elle ; leur valeur reste en memoire. */
@@ -136,7 +136,7 @@ document.addEventListener('click', (evenement) => {
     return recalculer();
   }
   if (action === undefined || !action.startsWith('exporter-')) return;
-  if (dernier === null) return montrerErreur('Aucun calcul valide a exporter : corriger la saisie.');
+  if (dernier === null) return montrerErreur('Aucun calcul valide à exporter : corriger la saisie.');
   const d = dernier.donnees.donnees;
   const entrees = blocEntrees(d, saisie.generation);
   const base = `interface-${saisie.generation}`;

@@ -20,11 +20,11 @@ export type Rugosite = 'tres-lisse' | 'lisse' | 'rugueuse' | 'tres-rugueuse' | '
 export const RUGOSITES: readonly Rugosite[] = ['tres-lisse', 'lisse', 'rugueuse', 'tres-rugueuse', 'a-cles'];
 
 export const LIBELLES_RUGOSITE: Record<Rugosite, string> = {
-  'tres-lisse': 'tres lisse',
+  'tres-lisse': 'très lisse',
   lisse: 'lisse',
   rugueuse: 'rugueuse',
-  'tres-rugueuse': 'tres rugueuse (2e generation)',
-  'a-cles': 'a cles',
+  'tres-rugueuse': 'très rugueuse (2e génération)',
+  'a-cles': 'à clés',
 };
 
 export interface Profil2004 {
@@ -59,8 +59,8 @@ export interface ProfilInterface {
 
 function controler(chemin: string, v: ValeurSourcee | null): void {
   if (v === null) return;
-  if (!Number.isFinite(v.valeur)) throw new Error(`Profil : ${chemin} n est pas un nombre.`);
-  if (v.source.trim() === '') throw new Error(`Profil : ${chemin} n a pas de source ; une valeur sans provenance bloque le calcul.`);
+  if (!Number.isFinite(v.valeur)) throw new Error(`Profil : ${chemin} n'est pas un nombre.`);
+  if (v.source.trim() === '') throw new Error(`Profil : ${chemin} n'a pas de source ; une valeur sans provenance bloque le calcul.`);
 }
 
 /** Leve en nommant la premiere valeur sans source ou non numerique. */
