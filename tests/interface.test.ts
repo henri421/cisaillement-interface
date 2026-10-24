@@ -77,7 +77,7 @@ describe('rugosite, charges dynamiques et conditions', () => {
   it('tres rugueuse en 2004 : traitee comme rugueuse, et dit', () => {
     const r = verifierInterface(predalle({ rugosite: 'tres-rugueuse' }), '2004', P);
     expect(r.verifications[0].resistance).toBeCloseTo(0.478793, 5);
-    expect(r.avertissements.join(' ')).toMatch(/traitee comme « rugueuse »/);
+    expect(r.avertissements.join(' ')).toMatch(/traitée comme « rugueuse »/);
   });
 
   it('interface a cles, ancrage insuffisant : (8.77) sans objet', () => {
@@ -104,7 +104,7 @@ describe('rugosite, charges dynamiques et conditions', () => {
 
 describe('controles', () => {
   it('refuse un beta superieur a 1 et un V_Ed nul', () => {
-    expect(() => verifierInterface(predalle({ beta: 1.2 }), '2004', P)).toThrow(/beta ne peut pas depasser 1/);
+    expect(() => verifierInterface(predalle({ beta: 1.2 }), '2004', P)).toThrow(/beta ne peut pas dépasser 1/);
     expect(() => verifierInterface(predalle({ VEd: 0 }), '2004', P)).toThrow(/V_Ed/);
   });
 
