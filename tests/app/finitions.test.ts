@@ -7,11 +7,12 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { NOMS_GRECS, notationHtml, blocsEnTexte, constatsAffichage, contenuBalise, resultatsEnCsv, texteVisible } from 'aedificium-ui';
+import { NOMS_GRECS, notationHtml, blocsEnTexte, constatsAffichage, contenuBalise, noteDeCalculHtml, resultatsEnCsv, texteVisible } from 'aedificium-ui';
 import { LIBELLES_RUGOSITE, RUGOSITES, ec2Recommande, verifierInterface } from '../../src/index';
 import { lireSaisie, saisieParDefaut, type Saisie } from '../../app/src/form';
 import { blocEntrees, blocsResultat, coupe, tableauVerification, verdictHtml } from '../../app/src/vue';
-import { noteDeCalculHtml } from '../../app/src/export';
+import { STYLES_TRACE } from '../../app/src/export';
+import { noteDuCalcul } from '../../app/src/note';
 
 const P = ec2Recommande();
 const TITRE = "Cisaillement à l'interface";
@@ -46,7 +47,7 @@ function sorties() {
       const r = verifierInterface(l.donnees, g, P);
       const entrees = blocEntrees(l.donnees, g);
       ecran.push(coupe(l.donnees), verdictHtml(r), ...r.verifications.map(tableauVerification));
-      notes.push(noteDeCalculHtml(l.donnees, r, entrees, coupe(l.donnees), '2026-10-24'));
+      notes.push(noteDeCalculHtml(noteDuCalcul(l.donnees, r, { projet: 'Plancher', element: '', date: '2026-10-24' }), STYLES_TRACE));
       csv.push(resultatsEnCsv(blocsEnTexte([entrees, ...blocsResultat(r)])));
     }
   }
