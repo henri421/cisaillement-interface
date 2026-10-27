@@ -6,15 +6,17 @@
  * de la saisie : la basculer ne touche a aucune valeur saisie.
  */
 
-import { blocsEnTexte, echapper, notationHtml, ouvrirOuTelecharger, resultatsEnCsv, svgAutonome, telecharger } from 'aedificium-ui';
+import { blocsEnTexte, echapper, noteDeCalculHtml, notationHtml, ouvrirOuTelecharger, resultatsEnCsv, svgAutonome, telecharger } from 'aedificium-ui';
 import { LIBELLES_RUGOSITE, RUGOSITES, ec2Recommande, verifierInterface, type Generation, type Rugosite } from '../../src/index';
 import { lireSaisie, relire, saisieParDefaut, serialiser, type Saisie } from './form';
 import { blocEntrees, blocsResultat, coupe, messageDErreur, tableauVerification, verdictHtml } from './vue';
-import { STYLES_TRACE, noteDeCalculHtml } from './export';
+import { STYLES_TRACE } from './export';
+import { noteDuCalcul } from './note';
 import './style.css';
 
 const PROFIL = ec2Recommande();
 const CLE_STOCKAGE = 'cisaillement-interface/saisie';
+const CLE_CARTOUCHE = 'cisaillement-interface:cartouche';
 
 function exige<T extends Element>(selecteur: string): T {
   const e = document.querySelector<T>(selecteur);
@@ -29,6 +31,8 @@ const zones = {
   verdict: exige<HTMLElement>('[data-role="verdict"]'),
   details: exige<HTMLElement>('[data-role="details"]'),
 };
+const champProjet = exige<HTMLInputElement>('[data-role="projet"]');
+const champElement = exige<HTMLInputElement>('[data-role="element"]');
 
 exige<HTMLSelectElement>('[data-role="rugosite"]').innerHTML = RUGOSITES.map(
   (r) => `<option value="${r}">${echapper(LIBELLES_RUGOSITE[r])}</option>`
@@ -48,6 +52,20 @@ function memoriser(): void {
     window.localStorage.setItem(CLE_STOCKAGE, serialiser(saisie));
   } catch {
     // Stockage indisponible : la page fonctionne sans.
+  }
+}
+
+function lireCartouche(): { projet: string; element: string } {
+  try {
+    const t = window.localStorage.getItem(CLE_CARTOUCHE);
+    if (t === null) return { projet: '', element: '' };
+    const c = JSON.parse(t) as { projet?: unknown; element?: unknown };
+    return {
+      projet: typeof c.projet === 'string' ? c.projet : '',
+      element: typeof c.element === 'string' ? c.element : '',
+    };
+  } catch {
+    return { projet: '', element: '' };
   }
 }
 
@@ -145,7 +163,12 @@ document.addEventListener('click', (evenement) => {
   } else if (action === 'exporter-resultats') {
     telecharger(`${base}-resultats.csv`, resultatsEnCsv(blocsEnTexte([entrees, ...blocsResultat(dernier.resultat)])), 'text/csv;charset=utf-8');
   } else if (action === 'exporter-note') {
-    ouvrirOuTelecharger(`${base}-note.html`, noteDeCalculHtml(d, dernier.resultat, entrees, dernier.coupe, new Date().toISOString().slice(0, 10)));
+    const note = noteDuCalcul(d, dernier.resultat, {
+      projet: champProjet.value,
+      element: champElement.value,
+      date: new Date().toISOString().slice(0, 10),
+    });
+    ouvrirOuTelecharger(`${base}-note.html`, noteDeCalculHtml(note, STYLES_TRACE));
   }
 });
 
@@ -161,6 +184,17 @@ exige<HTMLInputElement>('[data-role="ouvrir"]').addEventListener('change', async
   }
   ecrireSaisie();
   recalculer();
+});
+
+const cartouche = lireCartouche();
+champProjet.value = cartouche.projet;
+champElement.value = cartouche.element;
+exige<HTMLElement>('#sorties').addEventListener('input', () => {
+  try {
+    window.localStorage.setItem(CLE_CARTOUCHE, JSON.stringify({ projet: champProjet.value, element: champElement.value }));
+  } catch {
+    // Stockage indisponible : la page fonctionne sans.
+  }
 });
 
 ecrireSaisie();
