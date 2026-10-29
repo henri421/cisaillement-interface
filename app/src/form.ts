@@ -9,6 +9,7 @@
 
 import { lireNombre } from 'aedificium-ui';
 import { RUGOSITES, type DonneesInterface, type Generation, type Rugosite } from '../../src/index';
+import { textes } from './textes';
 
 export interface Saisie {
   generation: Generation;
@@ -64,10 +65,10 @@ export function lireSaisie(s: Saisie): Lecture {
   for (const champ of Object.keys(LIBELLES)) {
     const brut = String(s[champ as keyof Saisie]);
     const v = lireNombre(brut);
-    if (v === null) return { ok: false, message: `${LIBELLES[champ]} : nombre attendu, reçu « ${brut} ».` };
+    if (v === null) return { ok: false, message: textes().messages.nombreAttendu(LIBELLES[champ], brut) };
     n[champ] = v;
   }
-  if (!RUGOSITES.includes(s.rugosite)) return { ok: false, message: 'État de surface inconnu.' };
+  if (!RUGOSITES.includes(s.rugosite)) return { ok: false, message: textes().messages.surfaceInconnue };
   return {
     ok: true,
     donnees: {
@@ -96,7 +97,7 @@ export function serialiser(s: Saisie): string {
 /** Relit un document enregistre ; les champs absents prennent leur valeur par defaut. */
 export function relire(texte: string): Saisie {
   const brut = JSON.parse(texte) as Record<string, unknown>;
-  if (brut.format !== FORMAT) throw new Error(`Fichier de format ${JSON.stringify(brut.format)} : attendu ${FORMAT}.`);
+  if (brut.format !== FORMAT) throw new Error(textes().messages.format(JSON.stringify(brut.format), FORMAT));
   const d = saisieParDefaut();
   const texteDe = (cle: keyof Saisie) => (typeof brut[cle] === 'string' ? (brut[cle] as string) : (d[cle] as string));
   return {

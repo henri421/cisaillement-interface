@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="theme-color" content="#f7f7f6" />
+    <link rel="icon" href="../icone.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="../icone-192.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shear at the interface — construction joints, EN 1992-1-1</title>
+  </head>
+  <body>
+    <nav class="barre" aria-label="suite of tools">
+      <div class="barre-corps">
+        <span class="barre-nom">Aedificium &middot; Interface</span>
+        <div class="barre-actions">
+          <a class="barre-lien" href="https://henri421.github.io/WebAedificium/en/" target="_blank" rel="noopener"
+            >Aedificium suite &#8599;</a
+          >
+          <a class="barre-langue" href="../" hreflang="fr" lang="fr" aria-label="Version française">FR</a>
+        </div>
+      </div>
+    </nav>
+
+    <header>
+      <h1>Shear at the interface</h1>
+      <p class="sous-titre">
+        Shear along construction joints between concretes cast at different times (slab on precast planks, joint
+        between two pours), to EN 1992-1-1:2004 (6.2.5) or EN 1992-1-1:2023 (8.2.6).
+      </p>
+      <p class="avertissement">
+        Recommended values of EN 1992-1-1: the National Annex may modify them. The 2nd generation only applies once
+        its National Annex is published.
+      </p>
+    </header>
+
+    <main>
+      <section id="saisie" aria-label="input">
+        <div class="generations" role="group" aria-label="Eurocode generation">
+          <button type="button" data-generation="2004">1st generation (2004)</button>
+          <button type="button" data-generation="2023">2nd generation (2023)</button>
+        </div>
+        <p class="note">Switching generation keeps all the input.</p>
+        <form id="formulaire" autocomplete="off">
+          <fieldset>
+            <legend>Action and composite section</legend>
+            <label><span>V<sub>Ed</sub> (kN)</span><input type="text" inputmode="decimal" data-champ="VEd" /></label>
+            <label><span>&beta;, share in the new concrete</span><input type="text" inputmode="decimal" data-champ="beta" /></label>
+            <label><span>z, lever arm (mm)</span><input type="text" inputmode="decimal" data-champ="z" /></label>
+            <label><span>b<sub>i</sub>, width of the interface (mm)</span><input type="text" inputmode="decimal" data-champ="bi" /></label>
+            <label><span>&sigma;<sub>n</sub> (MPa, compression +)</span><input type="text" inputmode="decimal" data-champ="sigmaN" /></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Interface and materials</legend>
+            <label
+              ><span>Surface condition</span>
+              <select data-champ="rugosite" data-role="rugosite"></select>
+            </label>
+            <label><span>f<sub>ck</sub>, weaker of the two concretes (MPa)</span><input type="text" inputmode="decimal" data-champ="fck" /></label>
+            <label><span>f<sub>yk</sub> (MPa)</span><input type="text" inputmode="decimal" data-champ="fyk" /></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Reinforcement across the interface</legend>
+            <label><span>A<sub>si</sub> (mm&sup2;/m)</span><input type="text" inputmode="decimal" data-champ="Asi" /></label>
+            <label><span>&alpha;, angle to the interface (&deg;)</span><input type="text" inputmode="decimal" data-champ="alpha" /></label>
+            <div class="groupe" data-groupe="2023">
+              <label class="case"><input type="checkbox" data-champ="armaturesAncrees" /><span>Anchored to develop f<sub>yd</sub> (8.76)</span></label>
+            </div>
+            <div class="groupe" data-groupe="2004">
+              <label class="case"><input type="checkbox" data-champ="dynamique" /><span>Dynamic or fatigue loads (c / 2)</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Model</legend>
+            <div class="boutons">
+              <button type="button" data-action="enregistrer">Save (JSON)</button>
+              <button type="button" data-action="reinitialiser">Starting example</button>
+            </div>
+            <label class="large fichier"><span>Open a model</span><input type="file" accept="application/json,.json" data-role="ouvrir" /></label>
+          </fieldset>
+        </form>
+        <p data-role="erreur" class="erreur" role="alert" hidden></p>
+      </section>
+
+      <div class="colonne">
+        <section aria-label="section">
+          <h2>Section</h2>
+          <div data-role="coupe"></div>
+        </section>
+        <section aria-label="check">
+          <h2>Check</h2>
+          <div data-role="verdict"></div>
+          <div data-role="details"></div>
+        </section>
+        <section id="sorties" aria-label="outputs">
+          <h2>Outputs</h2>
+          <label><span>Project</span><input type="text" data-role="projet" /></label>
+          <label><span>Element</span><input type="text" data-role="element" placeholder="empty = Concrete-to-concrete interface" /></label>
+          <div class="boutons">
+            <button type="button" data-action="exporter-coupe">Section (SVG)</button>
+            <button type="button" data-action="exporter-resultats">Results (CSV)</button>
+            <button type="button" data-action="exporter-note">Calculation note (printable HTML)</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <p>
+        Part of the <a href="https://henri421.github.io/WebAedificium/en/">Aedificium</a> suite. Fully local calculation:
+        no data leaves the browser.
+      </p>
+    </footer>
+
+    <script type="module" src="../src/main.ts"></script>
+  </body>
+</html>

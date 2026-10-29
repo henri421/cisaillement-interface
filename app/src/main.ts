@@ -6,13 +6,28 @@
  * de la saisie : la basculer ne touche a aucune valeur saisie.
  */
 
-import { blocsEnTexte, echapper, noteDeCalculHtml, notationHtml, ouvrirOuTelecharger, resultatsEnCsv, svgAutonome, telecharger } from 'aedificium-ui';
-import { LIBELLES_RUGOSITE, RUGOSITES, ec2Recommande, verifierInterface, type Generation, type Rugosite } from '../../src/index';
+import {
+  blocsEnTexte,
+  definirLangue,
+  echapper,
+  langueDuDocument,
+  noteDeCalculHtml,
+  notationHtml,
+  ouvrirOuTelecharger,
+  resultatsEnCsv,
+  svgAutonome,
+  telecharger,
+} from 'aedificium-ui';
+import { RUGOSITES, ec2Recommande, verifierInterface, type Generation, type Rugosite } from '../../src/index';
 import { lireSaisie, relire, saisieParDefaut, serialiser, type Saisie } from './form';
 import { blocEntrees, blocsResultat, coupe, messageDErreur, tableauVerification, verdictHtml } from './vue';
 import { STYLES_TRACE } from './export';
 import { noteDuCalcul } from './note';
+import { textes } from './textes';
 import './style.css';
+
+// La langue d'abord : tout rendu la lit (`index.html` ou `en/index.html`).
+definirLangue(langueDuDocument(document));
 
 const PROFIL = ec2Recommande();
 const CLE_STOCKAGE = 'cisaillement-interface/saisie';
@@ -35,7 +50,7 @@ const champProjet = exige<HTMLInputElement>('[data-role="projet"]');
 const champElement = exige<HTMLInputElement>('[data-role="element"]');
 
 exige<HTMLSelectElement>('[data-role="rugosite"]').innerHTML = RUGOSITES.map(
-  (r) => `<option value="${r}">${echapper(LIBELLES_RUGOSITE[r])}</option>`
+  (r) => `<option value="${r}">${echapper(textes().rugosites[r])}</option>`
 ).join('');
 
 function charger(): Saisie | null {
@@ -154,7 +169,7 @@ document.addEventListener('click', (evenement) => {
     return recalculer();
   }
   if (action === undefined || !action.startsWith('exporter-')) return;
-  if (dernier === null) return montrerErreur('Aucun calcul valide à exporter : corriger la saisie.');
+  if (dernier === null) return montrerErreur(textes().messages.rienAExporter);
   const d = dernier.donnees.donnees;
   const entrees = blocEntrees(d, saisie.generation);
   const base = `interface-${saisie.generation}`;

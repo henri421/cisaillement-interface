@@ -1,50 +1,52 @@
 /**
  * Mise en forme : verdict, tableaux, coupe schematique. PUR.
  *
- * L'ecran et la note de calcul appellent ces memes fonctions.
+ * L'ecran et la note de calcul appellent ces memes fonctions. Les textes
+ * viennent de `textes.ts`, dans la langue de la page.
  */
 
 import { notationHtml, notationSvg, nombreAffiche, tauxAffiche, type BlocResultat } from 'aedificium-ui';
-import { LIBELLES_RUGOSITE, type DonneesInterface, type ResultatInterface, type Verification } from '../../src/index';
-
-const TITRES = { conforme: 'Conforme', 'non-conforme': 'Non conforme', 'non-applicable': 'Non applicable' } as const;
+import type { DonneesInterface, ResultatInterface, Verification } from '../../src/index';
+import { phrase, textes } from './textes';
 
 /** Nombre affiche : trois decimales au plus, sans zeros inutiles. */
 const aff = (v: number, d: number): string => nombreAffiche(v, Math.min(d, 3));
 
-export const NOM_GENERATION = {
-  '2004': '1re génération — EN 1992-1-1:2004, 6.2.5',
-  '2023': '2e génération — EN 1992-1-1:2023, 8.2.6',
-} as const;
-
+/** Message d'une erreur du noyau ou de la lecture, dans la langue de la page. */
 export function messageDErreur(e: unknown): string {
-  return e instanceof Error ? e.message : String(e);
+  return phrase(e instanceof Error ? e.message : String(e));
+}
+
+/** Valeur et unite d'une grandeur intermediaire. */
+function valeurDe(g: Verification['intermediaires'][number]): string {
+  return `${aff(g.valeur, g.unite === '-' ? 5 : 3)}${g.unite === '-' ? '' : ` ${g.unite}`}`;
 }
 
 /** Verdict, motif et jauge du taux. */
 export function verdictHtml(r: ResultatInterface): string {
+  const t = textes();
   const v = r.verifications[0];
   const taux = v.taux;
   const jauge =
     taux === undefined
       ? ''
       : `<div class="jauge${taux > 1 ? ' depasse' : ''}"><div style="width:${(Math.min(taux, 1) * 100).toFixed(1)}%"></div></div>` +
-        `<p class="taux">Taux ${tauxAffiche(taux)}</p>`;
+        `<p class="taux">${t.taux} ${tauxAffiche(taux)}</p>`;
   return (
-    `<p class="verdict verdict-${r.verdict}">${TITRES[r.verdict]}</p>${jauge}<p class="motif">${notationHtml(r.motif)}</p>` +
-    r.avertissements.map((a) => `<p class="alerte">${notationHtml(a)}</p>`).join('')
+    `<p class="verdict verdict-${r.verdict}">${t.verdicts[r.verdict]}</p>${jauge}<p class="motif">${notationHtml(phrase(r.motif))}</p>` +
+    r.avertissements.map((a) => `<p class="alerte">${notationHtml(phrase(a))}</p>`).join('')
   );
 }
 
 /** Les grandeurs du calcul, en tableau. */
 export function tableauVerification(v: Verification): string {
-  const entete = `<h3>${notationHtml(v.titre)}</h3><p class="clause">${notationHtml(v.clauses.join(' · '))}</p>`;
-  if (v.statut.etat === 'non-applicable') return `${entete}<p class="motif">${notationHtml(v.statut.motif)}</p>`;
+  const entete = `<h3>${notationHtml(phrase(v.titre))}</h3><p class="clause">${notationHtml(v.clauses.map(phrase).join(' · '))}</p>`;
+  if (v.statut.etat === 'non-applicable') return `${entete}<p class="motif">${notationHtml(phrase(v.statut.motif))}</p>`;
   const lignes = v.intermediaires
     .map(
       (g) =>
-        `<tr><th>${notationHtml(g.symbole)}</th><td class="libelle">${notationHtml(g.libelle)}</td>` +
-        `<td class="valeur">${aff(g.valeur, g.unite === '-' ? 5 : 3)}${g.unite === '-' ? '' : ` ${g.unite}`}</td></tr>`
+        `<tr><th>${notationHtml(phrase(g.symbole))}</th><td class="libelle">${notationHtml(phrase(g.libelle))}</td>` +
+        `<td class="valeur">${valeurDe(g)}</td></tr>`
     )
     .join('');
   return `${entete}<table class="grandeurs"><tbody>${lignes}</tbody></table>`;
@@ -52,24 +54,26 @@ export function tableauVerification(v: Verification): string {
 
 /** Bloc des donnees d'entree, pour la note et le CSV. */
 export function blocEntrees(d: DonneesInterface, generation: '2004' | '2023'): BlocResultat {
+  const t = textes();
+  const e = t.entrees;
   const l = (symbole: string, libelle: string, valeur: string) => ({ symbole, libelle, valeur });
   return {
-    titre: "Données d'entrée",
+    titre: e.titre,
     lignes: [
-      l('génération', 'texte appliqué', NOM_GENERATION[generation]),
-      l('V_Ed', 'effort tranchant de calcul', `${aff(d.VEd, 1)} kN`),
-      l('beta', "part de l'effort longitudinal dans le béton de reprise", aff(d.beta, 3)),
-      l('z', 'bras de levier de la section composite', `${aff(d.z, 0)} mm`),
-      l('b_i', "largeur de l'interface", `${aff(d.bi, 0)} mm`),
-      l('surface', 'état de surface', LIBELLES_RUGOSITE[d.rugosite]),
-      l('f_ck', 'plus faible des deux bétons', `${aff(d.fck, 0)} MPa`),
-      l('f_yk', 'armatures', `${aff(d.fyk, 0)} MPa`),
-      l('A_si', "armatures traversant l'interface", `${aff(d.Asi, 0)} mm2/m`),
-      l('alpha', "angle des armatures avec l'interface", `${aff(d.alpha, 0)} degrés`),
-      l('sigma_n', 'contrainte normale, positive en compression', `${aff(d.sigmaN, 2)} MPa`),
+      l(e.generation[0], e.generation[1], t.generations[generation]),
+      l('V_Ed', e.VEd, `${aff(d.VEd, 1)} kN`),
+      l('beta', e.beta, aff(d.beta, 3)),
+      l('z', e.z, `${aff(d.z, 0)} mm`),
+      l('b_i', e.bi, `${aff(d.bi, 0)} mm`),
+      l(e.surface[0], e.surface[1], t.rugosites[d.rugosite]),
+      l('f_ck', e.fck, `${aff(d.fck, 0)} MPa`),
+      l('f_yk', e.fyk, `${aff(d.fyk, 0)} MPa`),
+      l('A_si', e.Asi, `${aff(d.Asi, 0)} mm2/m`),
+      l('alpha', e.alpha, `${aff(d.alpha, 0)} ${t.degres}`),
+      l('sigma_n', e.sigmaN, `${aff(d.sigmaN, 2)} MPa`),
       ...(generation === '2004'
-        ? [l('charges', 'dynamiques ou de fatigue', d.dynamique ? 'oui' : 'non')]
-        : [l('ancrage', 'armatures ancrées pour f_yd', d.Asi === 0 ? 'sans objet (A_si = 0)' : d.armaturesAncrees ? 'oui' : 'non')]),
+        ? [l(e.charges[0], e.charges[1], d.dynamique ? t.oui : t.non)]
+        : [l(e.ancrage[0], e.ancrage[1], d.Asi === 0 ? e.sansObjet : d.armaturesAncrees ? t.oui : t.non)]),
     ],
     note: null,
   };
@@ -77,23 +81,22 @@ export function blocEntrees(d: DonneesInterface, generation: '2004' | '2023'): B
 
 /** Blocs des resultats, pour le CSV : les memes grandeurs que le tableau a l'ecran. */
 export function blocsResultat(r: ResultatInterface): BlocResultat[] {
+  const t = textes();
   return [
     ...r.verifications.map((v) => ({
-      titre: v.titre,
-      lignes: v.intermediaires.map((g) => ({
-        symbole: g.symbole,
-        libelle: g.libelle,
-        valeur: `${aff(g.valeur, g.unite === '-' ? 5 : 3)}${g.unite === '-' ? '' : ` ${g.unite}`}`,
-      })),
-      note: v.statut.etat === 'non-applicable' ? v.statut.motif : null,
+      titre: phrase(v.titre),
+      lignes: v.intermediaires.map((g) => ({ symbole: phrase(g.symbole), libelle: phrase(g.libelle), valeur: valeurDe(g) })),
+      note: v.statut.etat === 'non-applicable' ? phrase(v.statut.motif) : null,
     })),
     {
-      titre: 'Verdict',
+      titre: t.verdict.titre,
       lignes: [
-        { symbole: 'constat', libelle: 'verdict', valeur: TITRES[r.verdict] },
-        ...(r.verifications[0].taux === undefined ? [] : [{ symbole: 'taux', libelle: 'sollicitation / résistance', valeur: tauxAffiche(r.verifications[0].taux) }]),
+        { symbole: t.verdict.constat[0], libelle: t.verdict.constat[1], valeur: t.verdicts[r.verdict] },
+        ...(r.verifications[0].taux === undefined
+          ? []
+          : [{ symbole: t.verdict.taux[0], libelle: t.verdict.taux[1], valeur: tauxAffiche(r.verifications[0].taux) }]),
       ],
-      note: [r.motif, ...r.avertissements].join(' '),
+      note: [r.motif, ...r.avertissements].map(phrase).join(' '),
     },
   ];
 }
@@ -104,6 +107,7 @@ export function blocsResultat(r: ResultatInterface): BlocResultat[] {
  * de glissement.
  */
 export function coupe(d: DonneesInterface): string {
+  const t = textes();
   const L = 360;
   const x0 = 40;
   const yHaut = 40;
@@ -121,17 +125,17 @@ export function coupe(d: DonneesInterface): string {
           })
           .join('')
       : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 220" role="img" aria-label="coupe de l interface">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 220" role="img" aria-label="${t.coupe.aria}">
 <rect class="reprise" x="${x0}" y="${yHaut}" width="${L}" height="${yInterface - yHaut}" />
 <rect class="en-place" x="${x0}" y="${yInterface}" width="${L}" height="${yBas - yInterface}" />
 <line class="interface" x1="${x0}" y1="${yInterface}" x2="${x0 + L}" y2="${yInterface}" />
 ${barres}
 <line class="effort" x1="${x0 + 70}" y1="${yInterface - 14}" x2="${x0 + 190}" y2="${yInterface - 14}" />
 <path class="pointe" d="M ${x0 + 190} ${yInterface - 19} L ${x0 + 202} ${yInterface - 14} L ${x0 + 190} ${yInterface - 9} Z" />
-<text class="etiquette" x="${x0 + 6}" y="${yHaut + 16}">${notationSvg('béton de reprise')}</text>
-<text class="etiquette" x="${x0 + 6}" y="${yBas - 8}">${notationSvg('béton en place')}</text>
-<text class="etiquette" x="${x0 + L - 6}" y="${yInterface - 6}" text-anchor="end">${notationSvg(`interface, ${LIBELLES_RUGOSITE[d.rugosite]}`)}</text>
+<text class="etiquette" x="${x0 + 6}" y="${yHaut + 16}">${notationSvg(t.coupe.reprise)}</text>
+<text class="etiquette" x="${x0 + 6}" y="${yBas - 8}">${notationSvg(t.coupe.enPlace)}</text>
+<text class="etiquette" x="${x0 + L - 6}" y="${yInterface - 6}" text-anchor="end">${notationSvg(`${t.coupe.interface}, ${t.rugosites[d.rugosite]}`)}</text>
 <text class="etiquette" x="${x0 + 70}" y="${yInterface - 22}">${notationSvg('v_Edi = beta V_Ed / (z b_i)')}</text>
-<text class="etiquette" x="${x0 + L}" y="${yBas + 20}" text-anchor="end">${notationSvg(d.Asi > 0 ? `A_si = ${aff(d.Asi, 0)} mm2/m, alpha = ${aff(d.alpha, 0)}°` : "sans armature d'interface")}</text>
+<text class="etiquette" x="${x0 + L}" y="${yBas + 20}" text-anchor="end">${notationSvg(d.Asi > 0 ? `A_si = ${aff(d.Asi, 0)} mm2/m, alpha = ${aff(d.alpha, 0)}°` : t.coupe.sansArmature)}</text>
 </svg>`;
 }

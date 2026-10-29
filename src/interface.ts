@@ -231,7 +231,7 @@ export function verifier2023Ancrees(d: DonneesInterface, p: ProfilInterface): Ve
       g('f_yd', 'f_yk / gamma_S', fyd, 'MPa'),
       g('rho_i', 'A_si / A_i', rho, '-'),
       g('c_v1 √f_ck / gamma_C', traction ? 'annulé : interface tendue' : 'terme de cohésion', cohesion, 'MPa'),
-      g('mu_v sigma_n', traction ? 'annule : interface tendue' : 'terme de frottement', frottement, 'MPa'),
+      g('mu_v sigma_n', traction ? 'annulé : interface tendue' : 'terme de frottement', frottement, 'MPa'),
       g('rho_i f_yd (mu_v sin a + cos a)', 'terme des armatures', acier, 'MPa'),
       g('0,3 f_cd + rho_i f_yd cos a', 'plafond', plafond, 'MPa'),
       g('tau_Rdi', 'résistance', tauRdi, 'MPa'),
