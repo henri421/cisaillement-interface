@@ -8,6 +8,7 @@
 
 import {
   blocsEnTexte,
+  brancherFeuilles,
   definirLangue,
   echapper,
   langueDuDocument,
@@ -17,6 +18,8 @@ import {
   resultatsEnCsv,
   svgAutonome,
   telecharger,
+  type BarreFeuilles,
+  type Json,
 } from 'aedificium-ui';
 import { RUGOSITES, ec2Recommande, verifierInterface, type Generation, type Rugosite } from '../../src/index';
 import { lireSaisie, relire, saisieParDefaut, serialiser, type Saisie } from './form';
@@ -86,6 +89,12 @@ function lireCartouche(): { projet: string; element: string } {
 
 let saisie: Saisie = charger() ?? saisieParDefaut();
 
+/**
+ * Feuilles de calcul d'un projet de la suite. Dans un projet, chaque saisie
+ * va dans la feuille courante, pas dans la memoire « hors projet » de l'app.
+ */
+let barre: BarreFeuilles | null = null;
+
 interface Dernier {
   donnees: ReturnType<typeof lireSaisie> & { ok: true };
   resultat: ReturnType<typeof verifierInterface>;
@@ -115,7 +124,8 @@ function ajusterGeneration(): void {
 }
 
 function recalculer(): void {
-  memoriser();
+  if (barre?.dansUnProjet()) barre.signaler();
+  else memoriser();
   ajusterGeneration();
   const lecture = lireSaisie(saisie);
   if (!lecture.ok) return montrerErreur(lecture.message);
@@ -210,6 +220,18 @@ exige<HTMLElement>('#sorties').addEventListener('input', () => {
   } catch {
     // Stockage indisponible : la page fonctionne sans.
   }
+});
+
+barre = brancherFeuilles({
+  app: 'cisaillement-interface',
+  nomApp: exige<HTMLElement>('header h1').textContent ?? 'cisaillement-interface',
+  conteneur: exige<HTMLElement>('[data-role="feuilles"]'),
+  lire: () => JSON.parse(serialiser(saisie)) as Json,
+  charger: (d) => {
+    saisie = d === null ? saisieParDefaut() : relire(JSON.stringify(d));
+    ecrireSaisie();
+    recalculer();
+  },
 });
 
 ecrireSaisie();
