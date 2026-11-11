@@ -9,6 +9,7 @@ import type { BlocResultat, ElementNote, LigneResultat, NoteDeCalcul, Verificati
 import type { DonneesInterface, Generation, ResultatInterface, Verification } from '../../src/index';
 import { phrase, textes } from './textes';
 import { blocEntrees, blocsResultat, coupe } from './vue';
+import { VERSION_OUTIL } from './version';
 
 /** Hypotheses de la note, en francais (reference des tests). La note lit `textes()`. */
 export const HYPOTHESES = textes().note.hypotheses;
@@ -75,6 +76,7 @@ export function noteDuCalcul(
 
   return {
     cartouche: {
+      version: VERSION_OUTIL,
       projet: cartouche.projet,
       element: cartouche.element.trim() === '' ? t.element : cartouche.element,
       date: cartouche.date,
