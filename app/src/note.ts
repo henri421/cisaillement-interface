@@ -5,6 +5,7 @@
  * (`blocEntrees`, `blocsResultat`) ; elles ne sont ici que rangees.
  */
 
+import { avertissement2eGeneration } from 'aedificium-ui';
 import type { BlocResultat, ElementNote, LigneResultat, NoteDeCalcul, VerificationNote } from 'aedificium-ui';
 import type { DonneesInterface, Generation, ResultatInterface, Verification } from '../../src/index';
 import { phrase, textes } from './textes';
@@ -98,6 +99,6 @@ export function noteDuCalcul(
       calculs,
     },
     verifications: verificationsDeLaNote(r),
-    avertissements: r.avertissements.map(phrase),
+    avertissements: [...(r.generation === '2023' ? [avertissement2eGeneration()] : []), ...r.avertissements.map(phrase)],
   };
 }
