@@ -8,7 +8,7 @@
  */
 
 import { lireNombre } from 'aedificium-ui';
-import { RUGOSITES, type DonneesInterface, type Generation, type Rugosite } from '../../src/index';
+import { RUGOSITES, type DonneesInterface, type Generation, type ProfilInterface, type Rugosite, type ValeurSourcee } from '../../src/index';
 import { textes } from './textes';
 
 export interface Saisie {
@@ -25,6 +25,9 @@ export interface Saisie {
   sigmaN: string;
   dynamique: boolean;
   armaturesAncrees: boolean;
+  /** Parametres nationaux de la 1re generation (3.1.6), modifiables (audit U1). */
+  alphaCc: string;
+  alphaCt: string;
 }
 
 export function saisieParDefaut(): Saisie {
@@ -42,6 +45,8 @@ export function saisieParDefaut(): Saisie {
     sigmaN: '0',
     dynamique: false,
     armaturesAncrees: true,
+    alphaCc: '1,0',
+    alphaCt: '1,0',
   };
 }
 
@@ -55,9 +60,11 @@ const LIBELLES: Record<string, string> = {
   Asi: 'A_si',
   alpha: 'alpha',
   sigmaN: 'sigma_n',
+  alphaCc: 'alpha_cc',
+  alphaCt: 'alpha_ct',
 };
 
-export type Lecture = { ok: true; donnees: DonneesInterface } | { ok: false; message: string };
+export type Lecture = { ok: true; donnees: DonneesInterface; alphaCc: number; alphaCt: number } | { ok: false; message: string };
 
 /** Convertit la saisie ; refuse en nommant le premier champ illisible. */
 export function lireSaisie(s: Saisie): Lecture {
@@ -71,6 +78,8 @@ export function lireSaisie(s: Saisie): Lecture {
   if (!RUGOSITES.includes(s.rugosite)) return { ok: false, message: textes().messages.surfaceInconnue };
   return {
     ok: true,
+    alphaCc: n.alphaCc,
+    alphaCt: n.alphaCt,
     donnees: {
       VEd: n.VEd,
       beta: n.beta,
@@ -114,5 +123,14 @@ export function relire(texte: string): Saisie {
     sigmaN: texteDe('sigmaN'),
     dynamique: brut.dynamique === true,
     armaturesAncrees: brut.armaturesAncrees !== false,
+    alphaCc: texteDe('alphaCc'),
+    alphaCt: texteDe('alphaCt'),
   };
+}
+
+/** Profil de calcul avec alpha_cc et alpha_ct saisis ; une valeur changee est marquee imposee. */
+export function profilSaisi(p: ProfilInterface, a: { alphaCc: number; alphaCt: number }): ProfilInterface {
+  const v = (base: ValeurSourcee, x: number): ValeurSourcee =>
+    x === base.valeur ? base : { valeur: x, source: textes().messages.imposee(base.valeur, base.source) };
+  return { ...p, ec2004: { ...p.ec2004, alphaCc: v(p.ec2004.alphaCc, a.alphaCc), alphaCt: v(p.ec2004.alphaCt, a.alphaCt) } };
 }

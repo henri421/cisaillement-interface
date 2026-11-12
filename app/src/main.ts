@@ -22,7 +22,7 @@ import {
   type Json,
 } from 'aedificium-ui';
 import { RUGOSITES, ec2Recommande, verifierInterface, type Generation, type Rugosite } from '../../src/index';
-import { lireSaisie, relire, saisieParDefaut, serialiser, type Saisie } from './form';
+import { lireSaisie, profilSaisi, relire, saisieParDefaut, serialiser, type Saisie } from './form';
 import { blocEntrees, blocsResultat, coupe, messageDErreur, tableauVerification, verdictHtml } from './vue';
 import { STYLES_TRACE } from './export';
 import { noteDuCalcul } from './note';
@@ -130,7 +130,7 @@ function recalculer(): void {
   const lecture = lireSaisie(saisie);
   if (!lecture.ok) return montrerErreur(lecture.message);
   try {
-    const resultat = verifierInterface(lecture.donnees, saisie.generation, PROFIL);
+    const resultat = verifierInterface(lecture.donnees, saisie.generation, profilSaisi(PROFIL, lecture));
     dernier = { donnees: lecture, resultat, coupe: coupe(lecture.donnees) };
   } catch (e) {
     return montrerErreur(messageDErreur(e));

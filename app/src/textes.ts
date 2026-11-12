@@ -69,6 +69,7 @@ const FR = {
   },
   messages: {
     nombreAttendu: (champ: string, brut: string) => `${champ} : nombre attendu, reçu « ${brut} ».`,
+    imposee: (recommandee: number, source: string) => `valeur imposée par l'utilisateur (recommandée : ${String(recommandee).replace('.', ',')}, ${source})`,
     surfaceInconnue: 'État de surface inconnu.',
     format: (recu: string, attendu: string) => `Fichier de format ${recu} : attendu ${attendu}.`,
     rienAExporter: 'Aucun calcul valide à exporter : corriger la saisie.',
@@ -139,6 +140,7 @@ const EN: Textes = {
   },
   messages: {
     nombreAttendu: (champ: string, brut: string) => `${champ}: number expected, got “${brut}”.`,
+    imposee: (recommandee: number, source: string) => `value imposed by the user (recommended: ${recommandee}, ${source})`,
     surfaceInconnue: 'Unknown surface condition.',
     format: (recu: string, attendu: string) => `File of format ${recu}: expected ${attendu}.`,
     rienAExporter: 'No valid calculation to export: correct the input.',

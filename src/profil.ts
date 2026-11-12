@@ -32,6 +32,8 @@ export interface Profil2004 {
   gammaS: ValeurSourcee;
   /** alpha_cc dans f_cd = alpha_cc f_ck / gamma_C. */
   alphaCc: ValeurSourcee;
+  /** alpha_ct dans f_ctd = alpha_ct f_ctk,0,05 / gamma_C (3.16). */
+  alphaCt: ValeurSourcee;
   /** c et mu par etat de surface, 6.2.5(2). */
   c: Record<Rugosite, ValeurSourcee>;
   mu: Record<Rugosite, ValeurSourcee>;
@@ -69,6 +71,7 @@ export function verifierProfil(p: ProfilInterface): void {
   controler('2004 gamma_C', a.gammaC);
   controler('2004 gamma_S', a.gammaS);
   controler('2004 alpha_cc', a.alphaCc);
+  controler('2004 alpha_ct', a.alphaCt);
   const b = p.ec2023;
   controler('2023 gamma_C', b.gammaC);
   controler('2023 gamma_S', b.gammaS);
@@ -113,6 +116,7 @@ export function ec2Recommande(): ProfilInterface {
       gammaC: { valeur: 1.5, source: `${S2004}, tableau 2.1N` },
       gammaS: { valeur: 1.15, source: `${S2004}, tableau 2.1N` },
       alphaCc: { valeur: 1.0, source: `${S2004}, 3.1.6(1)` },
+      alphaCt: { valeur: 1.0, source: `${S2004}, 3.1.6(2)` },
       c: table(s2004, { 'tres-lisse': 0.025, lisse: 0.2, rugueuse: 0.4, 'tres-rugueuse': 0.4, 'a-cles': 0.5 }),
       mu: table(s2004, { 'tres-lisse': 0.5, lisse: 0.6, rugueuse: 0.7, 'tres-rugueuse': 0.7, 'a-cles': 0.9 }),
     },

@@ -151,7 +151,7 @@ export function verifier2004(d: DonneesInterface, p: ProfilInterface): Verificat
   const c = q.c[d.rugosite].valeur * (d.dynamique ? 0.5 : 1);
   const mu = q.mu[d.rugosite].valeur;
   const fctm = d.fck <= 50 ? 0.3 * d.fck ** (2 / 3) : 2.12 * Math.log(1 + (d.fck + 8) / 10);
-  const fctd = (0.7 * fctm) / q.gammaC.valeur;
+  const fctd = (q.alphaCt.valeur * 0.7 * fctm) / q.gammaC.valeur;
   const fyd = d.fyk / q.gammaS.valeur;
   const nu = 0.6 * (1 - d.fck / 250);
   // Interface tendue : c f_ctd est annule (6.2.5(1)) ; mu sigma_n, negatif, reste compte.
@@ -171,7 +171,9 @@ export function verifier2004(d: DonneesInterface, p: ProfilInterface): Verificat
       g('v_Edi', 'beta V_Ed / (z b_i)', v, 'MPa'),
       g('c', d.dynamique ? 'cohésion, divisée par 2 (charges dynamiques, 6.2.5(5))' : 'cohésion', c, '-'),
       g('mu', 'frottement', mu, '-'),
-      g('f_ctd', '0,7 f_ctm / gamma_C', fctd, 'MPa'),
+      g('alpha_ct', q.alphaCt.source, q.alphaCt.valeur, '-'),
+      g('f_ctd', 'alpha_ct 0,7 f_ctm / gamma_C', fctd, 'MPa'),
+      g('alpha_cc', q.alphaCc.source, q.alphaCc.valeur, '-'),
       g('f_cd', 'alpha_cc f_ck / gamma_C', fcd, 'MPa'),
       g('f_yd', 'f_yk / gamma_S', fyd, 'MPa'),
       g('rho', 'A_si / A_i', rho, '-'),
