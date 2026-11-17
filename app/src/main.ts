@@ -8,6 +8,10 @@
 
 import {
   avertissement2eGeneration,
+  avertissementAnnexeLu,
+  lireAnnexe,
+  nombreAffiche,
+  optionsAnnexe,
   blocsEnTexte,
   brancherFeuilles,
   definirLangue,
@@ -22,18 +26,18 @@ import {
   type BarreFeuilles,
   type Json,
 } from 'aedificium-ui';
-import { RUGOSITES, ec2Recommande, verifierInterface, type Generation, type Rugosite } from '../../src/index';
+import { RUGOSITES, verifierInterface, type Generation, type Rugosite } from '../../src/index';
 import { lireSaisie, profilSaisi, relire, saisieParDefaut, serialiser, type Saisie } from './form';
 import { blocEntrees, blocsResultat, coupe, messageDErreur, tableauVerification, verdictHtml } from './vue';
 import { STYLES_TRACE } from './export';
 import { noteDuCalcul } from './note';
+import { profilDeLAnnexe } from './annexe';
 import { textes } from './textes';
 import './style.css';
 
 // La langue d'abord : tout rendu la lit (`index.html` ou `en/index.html`).
 definirLangue(langueDuDocument(document));
 
-const PROFIL = ec2Recommande();
 const CLE_STOCKAGE = 'cisaillement-interface/saisie';
 const CLE_CARTOUCHE = 'cisaillement-interface:cartouche';
 
@@ -53,6 +57,7 @@ const zones = {
 const champProjet = exige<HTMLInputElement>('[data-role="projet"]');
 const champElement = exige<HTMLInputElement>('[data-role="element"]');
 
+exige<HTMLSelectElement>('[data-role="annexe"]').innerHTML = optionsAnnexe('recommande');
 exige<HTMLSelectElement>('[data-role="rugosite"]').innerHTML = RUGOSITES.map(
   (r) => `<option value="${r}">${echapper(textes().rugosites[r])}</option>`
 ).join('');
@@ -99,6 +104,7 @@ let barre: BarreFeuilles | null = null;
 interface Dernier {
   donnees: ReturnType<typeof lireSaisie> & { ok: true };
   resultat: ReturnType<typeof verifierInterface>;
+  profil: ReturnType<typeof profilSaisi>;
   coupe: string;
 }
 let dernier: Dernier | null = null;
@@ -121,6 +127,11 @@ function ajusterGeneration(): void {
   for (const b of document.querySelectorAll<HTMLButtonElement>('[data-generation]')) {
     b.setAttribute('aria-pressed', String(b.dataset.generation === saisie.generation));
   }
+  const bandeauLu = document.querySelector<HTMLElement>('[data-role="bandeau-annexe"]');
+  if (bandeauLu !== null) {
+    bandeauLu.textContent = avertissementAnnexeLu();
+    bandeauLu.hidden = saisie.annexe !== 'lu' || saisie.generation !== '2004' || bandeauLu.textContent === '';
+  }
   const bandeau = document.querySelector<HTMLElement>('[data-role="bandeau-2e-gen"]');
   if (bandeau !== null) {
     bandeau.hidden = saisie.generation !== '2023';
@@ -136,8 +147,9 @@ function recalculer(): void {
   const lecture = lireSaisie(saisie);
   if (!lecture.ok) return montrerErreur(lecture.message);
   try {
-    const resultat = verifierInterface(lecture.donnees, saisie.generation, profilSaisi(PROFIL, lecture));
-    dernier = { donnees: lecture, resultat, coupe: coupe(lecture.donnees) };
+    const profil = profilSaisi(profilDeLAnnexe(saisie.annexe), lecture);
+    const resultat = verifierInterface(lecture.donnees, saisie.generation, profil);
+    dernier = { donnees: lecture, resultat, profil, coupe: coupe(lecture.donnees) };
   } catch (e) {
     return montrerErreur(messageDErreur(e));
   }
@@ -154,6 +166,13 @@ formulaire.addEventListener('input', (evenement) => {
   if (champ === undefined) return;
   if (cible instanceof HTMLInputElement && cible.type === 'checkbox') {
     if (champ === 'dynamique' || champ === 'armaturesAncrees') saisie[champ] = cible.checked;
+  } else if (champ === 'annexe') {
+    // Changer d'annexe repremplit alpha_cc et alpha_ct ; ils restent modifiables ensuite.
+    saisie.annexe = lireAnnexe(cible.value);
+    const e = profilDeLAnnexe(saisie.annexe).ec2004;
+    saisie.alphaCc = nombreAffiche(e.alphaCc.valeur, 3);
+    saisie.alphaCt = nombreAffiche(e.alphaCt.valeur, 3);
+    ecrireSaisie();
   } else if (champ === 'rugosite') {
     saisie.rugosite = cible.value as Rugosite;
   } else if (champ !== 'generation' && champ !== 'dynamique' && champ !== 'armaturesAncrees') {
@@ -194,11 +213,13 @@ document.addEventListener('click', (evenement) => {
   } else if (action === 'exporter-resultats') {
     telecharger(`${base}-resultats.csv`, resultatsEnCsv(blocsEnTexte([entrees, ...blocsResultat(dernier.resultat)])), 'text/csv;charset=utf-8');
   } else if (action === 'exporter-note') {
-    const note = noteDuCalcul(d, dernier.resultat, {
-      projet: champProjet.value,
-      element: champElement.value,
-      date: new Date().toISOString().slice(0, 10),
-    });
+    const note = noteDuCalcul(
+      d,
+      dernier.resultat,
+      { projet: champProjet.value, element: champElement.value, date: new Date().toISOString().slice(0, 10) },
+      saisie.annexe,
+      dernier.profil
+    );
     ouvrirOuTelecharger(`${base}-note.html`, noteDeCalculHtml(note, STYLES_TRACE));
   }
 });

@@ -7,7 +7,7 @@
  * est conservee quand l'autre est active, simplement ignoree.
  */
 
-import { lireNombre } from 'aedificium-ui';
+import { lireAnnexe, lireNombre, type AnnexeNationale } from 'aedificium-ui';
 import { RUGOSITES, type DonneesInterface, type Generation, type ProfilInterface, type Rugosite, type ValeurSourcee } from '../../src/index';
 import { textes } from './textes';
 
@@ -28,6 +28,8 @@ export interface Saisie {
   /** Parametres nationaux de la 1re generation (3.1.6), modifiables (audit U1). */
   alphaCc: string;
   alphaCt: string;
+  /** Annexe nationale (lot E) : preremplit alpha_cc et alpha_ct de la 1re generation. */
+  annexe: AnnexeNationale;
 }
 
 export function saisieParDefaut(): Saisie {
@@ -47,6 +49,7 @@ export function saisieParDefaut(): Saisie {
     armaturesAncrees: true,
     alphaCc: '1,0',
     alphaCt: '1,0',
+    annexe: 'recommande',
   };
 }
 
@@ -125,6 +128,7 @@ export function relire(texte: string): Saisie {
     armaturesAncrees: brut.armaturesAncrees !== false,
     alphaCc: texteDe('alphaCc'),
     alphaCt: texteDe('alphaCt'),
+    annexe: lireAnnexe(brut.annexe),
   };
 }
 

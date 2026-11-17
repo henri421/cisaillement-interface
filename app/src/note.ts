@@ -5,9 +5,9 @@
  * (`blocEntrees`, `blocsResultat`) ; elles ne sont ici que rangees.
  */
 
-import { avertissement2eGeneration } from 'aedificium-ui';
+import { avertissement2eGeneration, avertissementAnnexeLu, libelleAnnexe, nombreAffiche, traduireSource, type AnnexeNationale } from 'aedificium-ui';
 import type { BlocResultat, ElementNote, LigneResultat, NoteDeCalcul, VerificationNote } from 'aedificium-ui';
-import type { DonneesInterface, Generation, ResultatInterface, Verification } from '../../src/index';
+import type { DonneesInterface, Generation, ProfilInterface, ResultatInterface, Verification } from '../../src/index';
 import { phrase, textes } from './textes';
 import { blocEntrees, blocsResultat, coupe } from './vue';
 import { VERSION_OUTIL } from './version';
@@ -58,13 +58,29 @@ export function verificationsDeLaNote(r: ResultatInterface): VerificationNote[] 
 export function noteDuCalcul(
   d: DonneesInterface,
   r: ResultatInterface,
-  cartouche: { projet: string; element: string; date: string }
+  cartouche: { projet: string; element: string; date: string },
+  annexe: AnnexeNationale = 'recommande',
+  profil: ProfilInterface | null = null
 ): NoteDeCalcul {
   const t = textes().note;
+  const bloc = (titre: string, l: LigneResultat[]): ElementNote => ({ type: 'bloc', bloc: { titre, lignes: l, note: null } });
+  // Annexe nationale : 1re generation seulement (l'AN-LU:2020 ne couvre pas la 2e).
+  const avecAnnexe = r.generation === '2004' && profil !== null;
+  const coefsAnnexe: ElementNote[] = avecAnnexe
+    ? [
+        bloc(
+          `${t.annexe} : ${libelleAnnexe(annexe)}`,
+          (['gammaC', 'gammaS', 'alphaCc', 'alphaCt'] as const).map((k) => ({
+            symbole: { gammaC: 'gamma_C', gammaS: 'gamma_S', alphaCc: 'alpha_cc', alphaCt: 'alpha_ct' }[k],
+            libelle: traduireSource(profil.ec2004[k].source),
+            valeur: nombreAffiche(profil.ec2004[k].valeur, 3),
+          }))
+        ),
+      ]
+    : [];
   const entrees = blocEntrees(d, r.generation);
   const lignes = (section: 'geometrie' | 'materiaux' | 'hypotheses' | 'charges'): LigneResultat[] =>
     entrees.lignes.filter((l) => (RANGEMENT[l.symbole] ?? 'geometrie') === section);
-  const bloc = (titre: string, l: LigneResultat[]): ElementNote => ({ type: 'bloc', bloc: { titre, lignes: l, note: null } });
 
   // Le dernier bloc de `blocsResultat` est le verdict de l'ecran : la note n'en a pas.
   const calculs: ElementNote[] = blocsResultat(r)
@@ -93,12 +109,16 @@ export function noteDuCalcul(
       hypotheses: [
         bloc(t.texte, lignes('hypotheses')),
         { type: 'liste', items: t.hypotheses },
-        { type: 'texte', texte: t.mention },
+        ...(avecAnnexe ? coefsAnnexe : [{ type: 'texte' as const, texte: t.mention }]),
       ],
       charges: [bloc(t.sollicitations, lignes('charges'))],
       calculs,
     },
     verifications: verificationsDeLaNote(r),
-    avertissements: [...(r.generation === '2023' ? [avertissement2eGeneration()] : []), ...r.avertissements.map(phrase)],
+    avertissements: [
+      ...(r.generation === '2023' ? [avertissement2eGeneration()] : []),
+      ...(avecAnnexe && annexe === 'lu' ? [avertissementAnnexeLu()].filter((a) => a !== '') : []),
+      ...r.avertissements.map(phrase),
+    ],
   };
 }
