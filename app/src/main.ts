@@ -17,7 +17,7 @@ import {
   definirLangue,
   echapper,
   langueDuDocument,
-  noteDeCalculHtml,
+  noteDeCalculHtml, telechargerNotePdf,
   notationHtml,
   ouvrirOuTelecharger,
   resultatsEnCsv,
@@ -212,7 +212,7 @@ document.addEventListener('click', (evenement) => {
     telecharger(`${base}-coupe.svg`, svgAutonome(dernier.coupe, STYLES_TRACE), 'image/svg+xml;charset=utf-8');
   } else if (action === 'exporter-resultats') {
     telecharger(`${base}-resultats.csv`, resultatsEnCsv(blocsEnTexte([entrees, ...blocsResultat(dernier.resultat)])), 'text/csv;charset=utf-8');
-  } else if (action === 'exporter-note') {
+  } else if (action === 'exporter-note' || action === 'exporter-note-pdf') {
     const note = noteDuCalcul(
       d,
       dernier.resultat,
@@ -220,7 +220,10 @@ document.addEventListener('click', (evenement) => {
       saisie.annexe,
       dernier.profil
     );
-    ouvrirOuTelecharger(`${base}-note.html`, noteDeCalculHtml(note, STYLES_TRACE));
+    const noteCalc = note;
+    // PDF construit au clic ; en cas d'echec, la note HTML prend le relais.
+    if (action === 'exporter-note-pdf') void telechargerNotePdf(`${base}-note.pdf`, noteCalc, STYLES_TRACE).catch(() => ouvrirOuTelecharger(`${base}-note.html`, noteDeCalculHtml(noteCalc, STYLES_TRACE)));
+    else ouvrirOuTelecharger(`${base}-note.html`, noteDeCalculHtml(noteCalc, STYLES_TRACE));
   }
 });
 
