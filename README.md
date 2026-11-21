@@ -21,6 +21,10 @@ Page publiée : <https://henri421.github.io/cisaillement-interface/>.
 - Toutes les grandeurs intermédiaires, la coupe schématique, le verdict et le taux.
 - Sorties : coupe (SVG), résultats (CSV), note de calcul HTML produite par les mêmes fonctions
   que l'écran.
+- Classeur Excel à formules vivantes, au gabarit commun de la suite. Il est sur une seule
+  feuille, imprimable en A4, et seules les saisies y sont modifiables. Toutes les formules
+  sont nommées. Un test de concordance, sur 14 cas des deux générations, vérifie que
+  chaque formule redonne la valeur du noyau (fiche 11.3, pilote).
 
 ## Choix déclarés
 

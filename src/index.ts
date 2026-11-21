@@ -30,3 +30,4 @@ export {
   type Statut,
   type Verification,
 } from './interface';
+export { classeurInterface } from './formules';

@@ -9,6 +9,7 @@
 import {
   avertissement2eGeneration,
   avertissementAnnexeLu,
+  libelleAnnexe,
   lireAnnexe,
   nombreAffiche,
   optionsAnnexe,
@@ -30,6 +31,7 @@ import { RUGOSITES, verifierInterface, type Generation, type Rugosite } from '..
 import { lireSaisie, profilSaisi, relire, saisieParDefaut, serialiser, type Saisie } from './form';
 import { blocEntrees, blocsResultat, coupe, messageDErreur, tableauVerification, verdictHtml } from './vue';
 import { STYLES_TRACE } from './export';
+import { TYPE_XLSX, classeurDuCalcul, fichierExcel } from './excel';
 import { noteDuCalcul } from './note';
 import { profilDeLAnnexe } from './annexe';
 import { textes } from './textes';
@@ -210,6 +212,16 @@ document.addEventListener('click', (evenement) => {
   const base = `interface-${saisie.generation}`;
   if (action === 'exporter-coupe') {
     telecharger(`${base}-coupe.svg`, svgAutonome(dernier.coupe, STYLES_TRACE), 'image/svg+xml;charset=utf-8');
+  } else if (action === 'exporter-excel') {
+    const classeur = classeurDuCalcul(d, dernier.resultat, dernier.profil, {
+      titre: exige<HTMLElement>('header h1').textContent ?? 'cisaillement-interface',
+      projet: champProjet.value,
+      element: champElement.value,
+      date: new Date().toISOString().slice(0, 10),
+      annexe: saisie.generation === '2004' ? libelleAnnexe(saisie.annexe) : undefined,
+    });
+    const f = fichierExcel(classeur, saisie.generation);
+    telecharger(f.nom, f.octets, TYPE_XLSX);
   } else if (action === 'exporter-resultats') {
     telecharger(`${base}-resultats.csv`, resultatsEnCsv(blocsEnTexte([entrees, ...blocsResultat(dernier.resultat)])), 'text/csv;charset=utf-8');
   } else if (action === 'exporter-note' || action === 'exporter-note-pdf') {
